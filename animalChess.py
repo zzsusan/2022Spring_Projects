@@ -1,69 +1,84 @@
-import random
+from random import shuffle
 
 """
 Suzanne Wang, Keyu Han
 """
 
 
+class Piece:
+    def __init__(self, animal, belongings):
+        self.animal = animal
+        self.belongings = belongings
+        self.status = 0  # start as dark
+
+
 class AnimalChess:
-    class Piece:
-        def __init__(self, animal, belongings, status):
-            self.animal = animal
-            self.belongings = belongings
-            self.status = status
+    def __init__(self):
+        self.board = None
+        self.darkPieces = []
+        self.mingPiecesA = []
+        self.mingPiecesB = []
 
-    darkPieces = []
-    mingPiecesA = []
-    mingPiecesB = []
-
-    def generate_the_puzzle(self, row, col):
+    def generate_puzzle(self):
         """
         1. Generate a 4*4 puzzle of pieces
         [
           [[animal, belongings, status]]
         ]
         """
-        board = [[None for i in range(col)] for i in range(row)]
+        self.board = [[None for i in range(4)] for i in range(4)]
+        # generate pieces
+        pieces_list = []
+        for belonging in range(2):
+            for animal in range(8):
+                piece = Piece(animal, belonging)
+                pieces_list.append(piece)
 
-        for i in range(row):
-            for j in range(col):
-                cheese = AnimalChess.Piece(random.choice(range(9)), random.choice(range(2)), random.choice(range(2)))
-                board[i][j] = cheese
+        shuffle(pieces_list)
+        piece_idx = 0
+        for i in range(4):
+            for j in range(4):
+                self.board[i][j] = pieces_list[piece_idx]
+                piece_idx += 1
 
-        # print(board)
+    def print_board(self):
+        for i in range(4):
+            for j in range(4):
+                piece = self.board[i][j]
+                print(piece.animal, piece.belongings, end="|")
+            print()
 
-        return board
+    def decide_the_winner(self):
+        """
 
-
-animalChess = AnimalChess()
-animalChess.generate_the_puzzle(4, 4)
-
-
-def decide_the_winner():
-    """
-
-    """
-
-
-def flip_the_piece():
-    """
-    enter the opened position
-    """
-
-
-def move():
-    """
-
-    """
+        """
 
 
-def eat_the_piece():
-    """
-    """
+    def flip_the_piece(self):
+        """
+        enter the opened position
+        """
 
 
-def player_input():
-    """
-    this function is used to select if the next step is to make the move or eat the piece
-    player's input
-    """
+    def move(self):
+        """
+
+        """
+
+
+    def eat_the_piece(self):
+        """
+        """
+
+
+    def player_input(self):
+        """
+        this function is used to select if the next step is to make the move or eat the piece
+        player's input
+        """
+
+
+if __name__ == "__main__":
+    animalChess = AnimalChess()
+    animalChess.generate_puzzle()
+    animalChess.print_board()
