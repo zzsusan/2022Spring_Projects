@@ -18,8 +18,9 @@ class AnimalChess:
         self.darkPieces = []
         self.mingPiecesA = []
         self.mingPiecesB = []
+        self.isGameEnd = False
 
-    def generate_puzzle(self):
+    def generate_board(self):
         """
         1. Generate a 4*4 puzzle of pieces
         [
@@ -29,12 +30,12 @@ class AnimalChess:
         self.board = [[None for i in range(4)] for i in range(4)]
         # generate pieces
         pieces_list = []
-
-        for belonging in range(2):
+        for belonging in ['A', 'B']:
             for animal in range(8):
                 piece = Piece(animal, belonging)
                 pieces_list.append(piece)
 
+        # shuffle the pieces list and assign them to board
         shuffle(pieces_list)
         piece_idx = 0
         for i in range(4):
@@ -57,45 +58,67 @@ class AnimalChess:
             6: "\U0001F981",
             7: "\U0001F418"}
 
-        belongingsMap = {0: "A", 1: "B"}
+        # belongingsMap = {0: "A", 1: "B"}
 
         for i in range(4):
             for j in range(4):
                 piece = self.board[i][j]
-                print(animalsMap[piece.animal], belongingsMap[piece.belongings], end="|")
+                print(animalsMap[piece.animal], piece.belongings, (i, j), end=" | ")
             print()
+
+    def run_game(self):
+        self.player_input('A')
+        self.player_input('B')
+
+    def player_input(self, player):
+        """
+        this function is used to select if the next step is to make the move or eat the piece
+        player's input
+        """
+        valid_choice = False
+        while not valid_choice:
+            choice = input(f'Player {player}, please enter "F" to Flip a Dark Piece or enter "M" to Move a Ming Piece: ')
+            if choice == 'F':
+                self.flip_the_piece(player)
+                valid_choice = True
+            elif choice == 'M':
+                self.move(player)
+                valid_choice = True
+            else:
+                print('Please enter F or M to choose.')
+                valid_choice = False
+
+    def flip_the_piece(self, player):
+        """
+        enter the opened position
+        """
+        print(f'{player} chooses to flip.')
+
+    def move(self, player):
+        """
+        """
+        print(f'{player} chooses to move.')
+
+    def eat_the_piece(self, player):
+        """
+        """
+        pass
 
     def decide_the_winner(self):
         """
 
         """
+        pass
 
 
-    def flip_the_piece(self):
-        """
-        enter the opened position
-        """
-
-
-    def move(self):
-        """
-
-        """
-
-
-    def eat_the_piece(self):
-        """
-        """
-
-
-    def player_input(self):
-        """
-        this function is used to select if the next step is to make the move or eat the piece
-        player's input
-        """
+# class Player:
+#     def __init__(self, name, board):
+#         self.name = name
+#         self.board = board
 
 
 if __name__ == "__main__":
     animalChess = AnimalChess()
-    animalChess.generate_puzzle()
+    animalChess.generate_board()
     animalChess.print_board()
+    animalChess.run_game()
