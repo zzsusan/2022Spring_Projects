@@ -18,9 +18,8 @@ class AnimalChess:
         self.darkPieces = []
         self.mingPiecesA = []
         self.mingPiecesB = []
-        self.isGameEnd = False
 
-    def generate_board(self):
+    def generate_puzzle(self):
         """
         1. Generate a 4*4 puzzle of pieces
         [
@@ -30,12 +29,12 @@ class AnimalChess:
         self.board = [[None for i in range(4)] for i in range(4)]
         # generate pieces
         pieces_list = []
-        for belonging in ['A', 'B']:
+
+        for belonging in ["A", "B"]:
             for animal in range(8):
                 piece = Piece(animal, belonging)
                 pieces_list.append(piece)
 
-        # shuffle the pieces list and assign them to board
         shuffle(pieces_list)
         piece_idx = 0
         for i in range(4):
@@ -63,7 +62,10 @@ class AnimalChess:
         for i in range(4):
             for j in range(4):
                 piece = self.board[i][j]
-                print(animalsMap[piece.animal], piece.belongings, (i, j), end=" | ")
+                if piece.animal != None:
+                    print(animalsMap[piece.animal], piece.animal, piece.belongings, piece.status, (i, j), end=" | ")
+                else:
+                    print(None, (i, j), end=" | ")
             print()
 
     def run_game(self):
@@ -74,6 +76,8 @@ class AnimalChess:
         """
         this function is used to select if the next step is to make the move or eat the piece
         player's input
+        while not valid_choice:
+
         """
         valid_choice = False
         while not valid_choice:
@@ -93,11 +97,102 @@ class AnimalChess:
         enter the opened position
         """
         print(f'{player} chooses to flip.')
+        # check the validation of the chess
+        selected_piece = input("Please inter the row&col number of the chess you want to flip : ")
+
+        row = int(selected_piece[0])
+        col = int(selected_piece[1])
+
+        this_piece = self.board[row][col]
+        if this_piece.status == 1:
+            return "Invalid Flip! This one is already flipped"
+        # change the status
+        else:
+            self.board[row][col].status = 1
+            if this_piece.belongings == "A":
+                self.mingPiecesA.append(this_piece)
+            else:
+                self.mingPiecesB.append(this_piece)
+            self.print_board()
 
     def move(self, player):
         """
+        先选坐标，再选移动方向(移动，吃)
+        belongings 可以从参数中传进来吗
         """
         print(f'{player} chooses to move.')
+        selected_piece = input("Please inter the row&col number of the chess you want to move : ")
+        moveto = input("Please select the row&col number of the chess you want to move to : ")
+
+        row = int(selected_piece[0])
+        col = int(selected_piece[1])
+        moveto_row = int(moveto[0])
+        moveto_col = int(moveto[1])
+
+        # row, col, moveto_row, moveto_col, belongings
+        # TODO: Deep copy
+        this_piece = self.board[row][col]
+        moveto_piece = self.board[moveto_row][moveto_col]
+        # belongings = self.board[row][col].belongings
+
+        if this_piece is None or this_piece.belongings != player or moveto_piece.belongings == player:
+        # TODO:分开
+            print("Invalid Move! This chess/ The moveto chess is not open")
+        # when apiece.status = 1, make the move
+        else:
+            # check if the 差值 of the present animal and the move-to animals == 1, eat the moveto position's animals, can eat
+            if moveto_piece and moveto_piece.animal:
+                # if moveto_piece.belongings != player: # TODO:delete
+                if this_piece.animal - moveto_piece.animal == 1 or this_piece.animal - moveto_piece.animal == -7: # TODO:this is the eating rule >=1
+                    # EAT MOVETO PIECE; delete the move to piece(also delete the Opponient's ming piece), fill the moveto piece, delete this piece
+                    # if moveto_piece.belongings == 'A':
+                    #     print(moveto_piece.animal)
+                    #     self.mingPiecesB.remove(moveto_piece)
+                    # else:
+                    #     self.mingPiecesA.remove(moveto_piece)
+                    # TODO: clear
+                    # self.board[moveto_row][moveto_col] = this_piece
+                    self.board[moveto_row][moveto_col].animal = this_piece.animal
+                    self.board[moveto_row][moveto_col].belongings = this_piece.belongings
+                    self.board[moveto_row][moveto_col].status = this_piece.status
+                    # del(self.board[moveto_row][moveto_col])
+                    self.board[row][col].animal = None
+                    self.board[row][col].belongings = None
+                    self.board[row][col].status = None
+                    print("eat opponent")
+                    print(self.board[moveto_row][moveto_col].animal)
+                    print(self.board[row][col].animal)
+                    # del(self.board[row][col])
+                else:
+                    # TODO: 他被对方吃了
+                    pass
+            else:  # moveto is None
+                # delete this_piece, fill moveto_piece
+                self.board[moveto_row][moveto_col].animal = this_piece.animal
+                self.board[moveto_row][moveto_col].belongings = this_piece.belongings
+                self.board[moveto_row][moveto_col].status = this_piece.status
+                self.board[row][col].animal = None
+                self.board[row][col].belongings = None
+                self.board[row][col].status = None
+                print("move to empty")
+                print(self.board[moveto_row][moveto_col].animal)
+                print(self.board[row][col].animal)
+                # del(self.board[row][col])
+
+        self.print_board()
+
+    def play_the_game(self):
+        """
+        change the player to play the game
+        """
+        # first 5 turns
+        turns = 5
+        while turns > 0:
+            self.player_input("A")
+            self.player_input("B")
+            if self.decide_the_winner():
+                pass
+            turns -= 1
 
     def eat_the_piece(self, player):
         """
@@ -106,9 +201,30 @@ class AnimalChess:
 
     def decide_the_winner(self):
         """
-
         """
-        pass
+        return True
+
+    def demo_chess(self):
+
+        demo = [
+            [5, 1, 6, 5],
+            [4, 7, 0, 3],
+            [4, 7, 2, 3],
+            [1, 0, 2, 6]
+        ]
+
+        belong = [
+            ["A", "B", "A", "B"],
+            ["B", "B", "A", "B"],
+            ["A", "A", "B", "A"],
+            ["A", "B", "A", "B"]
+        ]
+
+        self.board = [[None for i in range(4)] for i in range(4)]
+        for i in range(4):
+            for j in range(4):
+                piece = Piece(demo[i][j], belong[i][j])
+                self.board[i][j] = piece
 
 
 # class Player:
@@ -119,6 +235,9 @@ class AnimalChess:
 
 if __name__ == "__main__":
     animalChess = AnimalChess()
-    animalChess.generate_board()
+    # animalChess.generate_puzzle()
+    animalChess.demo_chess()
     animalChess.print_board()
-    animalChess.run_game()
+    # animalChess.player_input("A")
+    animalChess.play_the_game()
+
