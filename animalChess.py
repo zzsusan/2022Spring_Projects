@@ -122,36 +122,46 @@ class AnimalChess:
         先选坐标，再选移动方向(移动，吃)
         belongings 可以从参数中传进来吗
         """
-        # TODO1: Add re-input of Invalid move
-        print(f'{player} chooses to move.')
-        selected_piece = input("Please inter the row&col number of the chess you want to move : ")
 
-        row = int(selected_piece[0])
-        col = int(selected_piece[1])
-        # invalid: this_piece.status == 0/ this_piece is None/ this_piece.belongings != player / moveto_piece.belongings == player (first)
-        # valid: this_piece is not None and this_piece.belongings == player  moveto_piece.belongings != player /.... (else)
-        # TODO2: add extra function
-        if self.board[row][col].animal is None:
-            print("ERROR: this is an empty piece! please select another position!")
-            return
-        if self.board[row][col].status == 0:
-            print("ERROR: This piece is closed! Please flip this position first! ")
-            return
-        if self.board[row][col].belongings != player:
-            print("ERROR: Can not move others chess. Please move your chess! ")
-            return
+        def reinput_move(row, col, player):
+            if self.board[row][col].animal is None:
+                print("ERROR: this is an empty piece! Please change to another position!")
+                return True
+            if self.board[row][col].status == 0:
+                print("ERROR: This piece is closed! Please flip this position first! ")
+                return True
+            if self.board[row][col].belongings != player:
+                print("ERROR: Can not move others chess. Please move your chess! ")
+                return True
+            return False
 
-        # TODO3: Add re-input of Invalid move
-        moveto = input("Please select the row&col number of the chess you want to move to : ")
-        moveto_row = int(moveto[0])
-        moveto_col = int(moveto[1])
-        # TODO4: add extra function
-        if self.board[moveto_row][moveto_col].belongings == player:
-            print("ERROR: Can not eat your chess. Please select another position!")
-            return
-        if self.board[moveto_row][moveto_col].status == 0:
-            # moveto_piece exit
-            print("ERROR: Can not move to this position. Please Flip this position first!")
+        move_valid = True
+        while move_valid:
+            print(f'{player} chooses to move.')
+            selected_piece = input("Please inter the row&col number of the chess you want to move : ")
+
+            row = int(selected_piece[0])
+            col = int(selected_piece[1])
+
+            move_valid = reinput_move(row, col, player)
+
+        def reinput_moveto(moveto_row, moveto_col, player):
+            if self.board[moveto_row][moveto_col].belongings == player:
+                print("ERROR: Can not eat your chess. Please select another position!")
+                return True
+            if self.board[moveto_row][moveto_col].status == 0:
+                # moveto_piece exit
+                print("ERROR: Can not move to this position. Please Flip this position first!")
+                return True
+            return False
+
+        moveto_valid = True
+        while moveto_valid:
+            moveto = input("Please select the row&col piece to eat : ")
+            moveto_row = int(moveto[0])
+            moveto_col = int(moveto[1])
+
+            moveto_valid = reinput_moveto(moveto_row, moveto_col, player)
 
         # row, col, moveto_row, moveto_col
         this_piece = copy.deepcopy(self.board[row][col])
