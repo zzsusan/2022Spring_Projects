@@ -43,7 +43,6 @@ class AnimalChess:
                 piece_idx += 1
 
     def print_board(self):
-
         # animalList : [0, 1, 2, 3, 4, 5, 6, 7] # Elephant > Lion > Tiger > Leopard > Dog > Woof > Cat > Rat | ADD # 0 can eat 7
         # animalsMap = {0: "Rat", 1: "Cat", 2:"Woof", 3: "Dog", 4: "Leopard", 5: "Tiger", 6: "Lion", 7: "Elephant"}
 
@@ -110,9 +109,10 @@ class AnimalChess:
         else:
             self.board[row][col].status = 1
             if this_piece.belongings == "A":
-                self.mingPiecesA.append(this_piece)
+                self.mingPiecesA.append(this_piece.animal)
             else:
-                self.mingPiecesB.append(this_piece)
+                self.mingPiecesB.append(this_piece.animal)
+            # TODO: add darkPieces?
             self.print_board()
 
     def move(self, player):
@@ -201,8 +201,40 @@ class AnimalChess:
 
     def decide_the_winner(self):
         """
+        run after each eat step when all pieces are Open
+        winner: the greatest piece of A is greater than the greatest piece of B, then A wins
         """
-        return True
+        # if not self.darkPieces:
+        greatest_A = self.mingPiecesA.max()
+        greatest_B = self.mingPiecesB.max()
+
+        could_eaten_result = self.be_eaten(greatest_A, 'A', greatest_B, 'B')
+
+        if could_eaten_result.len == 0 or 2:
+            return None
+        elif could_eaten_result.len == 1:
+            left_piece = could_eaten_result[0]
+            winner = left_piece.belongings
+            return winner
+
+    def be_eaten(self, animal1, belonging1, animal2, belonging2):
+        """
+        Detect if anyone can be eaten by the other
+        :param piece1: one piece from one party
+        :param piece2: one piece from the other
+        :return: what's left, [piece1], [piece2], [piece1, piece2]:remain, []: empty two
+        """
+        # animal1, belonging1 = piece1.animal, piece1.belongings
+        # animal2, belonging2 = piece2.animal, piece2.belongings
+        return []
+
+    def detect_end(self):
+        """
+        avoid no ending 兜圈子
+        Store the moves in a stack, if the stack is full? Too much same moves
+        :return:
+        """
+
 
     def demo_chess(self):
 
