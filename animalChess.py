@@ -1,4 +1,5 @@
 from random import shuffle
+import copy
 
 """
 Suzanne Wang, Keyu Han
@@ -6,10 +7,10 @@ Suzanne Wang, Keyu Han
 
 
 class Piece:
-    def __init__(self, animal, belongings):
+    def __init__(self, animal, belongings, status=0):
         self.animal = animal
         self.belongings = belongings
-        self.status = 0  # start as dark
+        self.status = status  # start as dark
 
 
 class AnimalChess:
@@ -115,71 +116,76 @@ class AnimalChess:
             # TODO: add darkPieces?
             self.print_board()
 
+
     def move(self, player):
         """
         先选坐标，再选移动方向(移动，吃)
         belongings 可以从参数中传进来吗
         """
+        # TODO1: Add re-input of Invalid move
         print(f'{player} chooses to move.')
         selected_piece = input("Please inter the row&col number of the chess you want to move : ")
-        moveto = input("Please select the row&col number of the chess you want to move to : ")
 
         row = int(selected_piece[0])
         col = int(selected_piece[1])
+        # invalid: this_piece.status == 0/ this_piece is None/ this_piece.belongings != player / moveto_piece.belongings == player (first)
+        # valid: this_piece is not None and this_piece.belongings == player  moveto_piece.belongings != player /.... (else)
+        # TODO2: add extra function
+        if self.board[row][col].animal is None:
+            print("ERROR: this is an empty piece! please select another position!")
+            return
+        if self.board[row][col].status == 0:
+            print("ERROR: This piece is closed! Please flip this position first! ")
+            return
+        if self.board[row][col].belongings != player:
+            print("ERROR: Can not move others chess. Please move your chess! ")
+            return
+
+        # TODO3: Add re-input of Invalid move
+        moveto = input("Please select the row&col number of the chess you want to move to : ")
         moveto_row = int(moveto[0])
         moveto_col = int(moveto[1])
+        # TODO4: add extra function
+        if self.board[moveto_row][moveto_col].belongings == player:
+            print("ERROR: Can not eat your chess. Please select another position!")
+            return
+        if self.board[moveto_row][moveto_col].status == 0:
+            # moveto_piece exit
+            print("ERROR: Can not move to this position. Please Flip this position first!")
 
-        # row, col, moveto_row, moveto_col, belongings
-        # TODO: Deep copy
-        this_piece = self.board[row][col]
-        moveto_piece = self.board[moveto_row][moveto_col]
-        # belongings = self.board[row][col].belongings
+        # row, col, moveto_row, moveto_col
+        this_piece = copy.deepcopy(self.board[row][col])
+        moveto_piece = copy.deepcopy(self.board[moveto_row][moveto_col])
 
-        if this_piece is None or this_piece.belongings != player or moveto_piece.belongings == player:
-        # TODO:分开
-            print("Invalid Move! This chess/ The moveto chess is not open")
-        # when apiece.status = 1, make the move
-        else:
-            # check if the 差值 of the present animal and the move-to animals == 1, eat the moveto position's animals, can eat
-            if moveto_piece and moveto_piece.animal:
-                # if moveto_piece.belongings != player: # TODO:delete
-                if this_piece.animal - moveto_piece.animal == 1 or this_piece.animal - moveto_piece.animal == -7: # TODO:this is the eating rule >=1
-                    # EAT MOVETO PIECE; delete the move to piece(also delete the Opponient's ming piece), fill the moveto piece, delete this piece
-                    # if moveto_piece.belongings == 'A':
-                    #     print(moveto_piece.animal)
-                    #     self.mingPiecesB.remove(moveto_piece)
-                    # else:
-                    #     self.mingPiecesA.remove(moveto_piece)
-                    # TODO: clear
-                    # self.board[moveto_row][moveto_col] = this_piece
-                    self.board[moveto_row][moveto_col].animal = this_piece.animal
-                    self.board[moveto_row][moveto_col].belongings = this_piece.belongings
-                    self.board[moveto_row][moveto_col].status = this_piece.status
-                    # del(self.board[moveto_row][moveto_col])
-                    self.board[row][col].animal = None
-                    self.board[row][col].belongings = None
-                    self.board[row][col].status = None
-                    print("eat opponent")
-                    print(self.board[moveto_row][moveto_col].animal)
-                    print(self.board[row][col].animal)
-                    # del(self.board[row][col])
-                else:
-                    # TODO: 他被对方吃了
-                    pass
-            else:  # moveto is None
-                # delete this_piece, fill moveto_piece
-                self.board[moveto_row][moveto_col].animal = this_piece.animal
-                self.board[moveto_row][moveto_col].belongings = this_piece.belongings
-                self.board[moveto_row][moveto_col].status = this_piece.status
-                self.board[row][col].animal = None
-                self.board[row][col].belongings = None
-                self.board[row][col].status = None
-                print("move to empty")
-                print(self.board[moveto_row][moveto_col].animal)
-                print(self.board[row][col].animal)
-                # del(self.board[row][col])
+        # add an empty piece
+        empty_piece = Piece(None, None, None)
 
-        self.print_board()
+        if moveto_piece.animal is None:  # direct move!
+            # directly move
+            self.board[moveto_row][moveto_col] = this_piece
+            self.board[row][col] = empty_piece
+            print(" This is a directly move!")
+            self.print_board()
+            return
+
+        # this_piece eat opponent
+        # rules: if the 差值 of the present animal and the move-to animals == 1 / -7, eat the moveto position's animals
+        if this_piece.animal - moveto_piece.animal == 1 or this_piece.animal - moveto_piece.animal == -7:
+            print("***** Eat your Opponent *****")
+            self.board[moveto_row][moveto_col] = this_piece
+            self.board[row][col] = empty_piece
+            print("finish eat the opponent ! ")
+            print("new moveto: ", self.board[moveto_row][moveto_col].animal)
+            print("new this_piece: ", self.board[row][col].animal)
+            self.print_board()
+            return
+
+        # this_piece is eaten by the opponent
+        if this_piece.animal - moveto_piece.animal == -1 or this_piece.animal - moveto_piece.animal == 7:
+            print("***** Your are eaten by your Opponent *****")
+            self.board[row][col] = empty_piece
+            self.print_board()
+            return
 
     def play_the_game(self):
         """
