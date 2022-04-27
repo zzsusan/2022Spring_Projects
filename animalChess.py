@@ -116,13 +116,15 @@ class AnimalChess:
             # TODO: add darkPieces?
             self.print_board()
 
-
     def move(self, player):
         """
-        先选坐标，再选移动方向(移动，吃)
-        belongings 可以从参数中传进来吗
+        validate the input of move & moveto
+        move to empty / eat the piece
+        change the Minglist of players
+        decide the winner
         """
 
+        # invalid: move is empty, move is closed, move.belongings != player
         def reinput_move(row, col, player):
             if self.board[row][col].animal is None:
                 print("ERROR: this is an empty piece! Please change to another position!")
@@ -145,6 +147,7 @@ class AnimalChess:
 
             move_valid = reinput_move(row, col, player)
 
+        # invalid: moveto.belongings == player, moveto.player is closed
         def reinput_moveto(moveto_row, moveto_col, player):
             if self.board[moveto_row][moveto_col].belongings == player:
                 print("ERROR: Can not eat your chess. Please select another position!")
