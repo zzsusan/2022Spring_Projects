@@ -9,6 +9,13 @@ Suzanne Wang, Keyu Han
 PLAYER_A = 'A'
 PLAYER_B = 'B'
 
+directions = {
+            'up': [-1, 0],
+            'down': [1, 0],
+            'right': [0, 1],
+            'left': [0, -1]
+        }
+
 class Piece:
     def __init__(self, animal, belongings, status=0):
         self.animal = animal
@@ -21,7 +28,7 @@ class AnimalChess:
         self.board = None
         self.darkPieces = []
         self.mingPieces = {
-            'A': [],
+            'A': [], # {row, col, animal}
             'B': []
         }
 
@@ -66,6 +73,9 @@ class AnimalChess:
         empty_piece = "\U00002B1C"
         # belongingsMap = {0: "A", 1: "B"}
 
+        print("mingPiecesA: ", self.mingPieces['A'])
+        print("mingPiecesB: ", self.mingPieces['B'])
+
         for i in range(4):
             for j in range(4):
                 piece = self.board[i][j]
@@ -86,28 +96,29 @@ class AnimalChess:
         while not valid_choice:
 
         """
+        print(f"\n***** {player}'s Turn *****")
         valid_choice = False
         while not valid_choice:
-            choice = input(f'Player {player}, please enter "F" to Flip a Dark Piece or enter "M" to Move a Ming Piece: ')
-            if choice == 'F':
+            choice = input(f'Please enter "f" to Flip a Dark Piece or enter "m" to Move a Ming Piece: ')
+            if choice == 'f':
                 valid_choice = self.flip_the_piece(player)
-            elif choice == 'M':
+            elif choice == 'm':
                 valid_choice = self.move(player)
             else:
-                print('Please enter F or M to choose.')
+                print('Please enter f or m to choose.')
                 valid_choice = False
 
     def flip_the_piece(self, player):
         """
         enter the opened position
         """
-        print(f'{player} chooses to flip.')
+        print(f'    {player} chooses to flip')
         flip_valid = False
         while not flip_valid:
             selected_piece_string = input("Please input the row & col number of the chess you want to flip (Enter to exit): ")
 
             if not selected_piece_string:
-                print("Exit flipping.")
+                print("\tExit flipping.")
                 return False
 
             selected_piece = selected_piece_string.split()
@@ -119,46 +130,44 @@ class AnimalChess:
                 row = int(selected_piece[0])
                 col = int(selected_piece[1])
             except ValueError:
-                print("ValueError! Please input two valid integers.")
+                print("\tINVALID! Please input two valid integers.")
                 flip_valid = False
             else:
                 flip_valid = self.is_valid_flip(row, col)
 
         # Change the status
-        self.add_MingPiece(row, col)
+        self.add_to_ming_pieces(row, col)
 
         self.print_board()
-        print("this is mingPiecesA list: ", self.mingPieces['A'])
-        print("this is mingPiecesB list: ", self.mingPieces['B'])
 
         return True
 
     def is_valid_flip(self, row, col):
         if row > 3 or col > 3 or row < 0 or col < 0:
-            print("Invalid ! The row or col is out of index range")
+            print("\tINVALID! The row or col is out of index range.")
             return False
 
         piece = self.board[row][col]
         if piece is None or piece.status == 1:
-            print("Invalid Flip! This one is already flipped")
+            print("\tINVALID! This one is already flipped.")
             return False
 
         return True
 
     def is_valid_move_from(self, row, col, player):
         if row > 3 or col > 3 or row < 0 or col < 0:
-            print("Invalid Move! The row or col is out of index range")
+            print("\tINVALID! The row or col is out of index range.")
             return False
 
         piece = self.board[row][col]
         if piece is None:
-            print("ERROR: this is an empty piece! Please change to another position!")
+            print("\tINVALID! This is an empty piece. Please change to another position.")
             return False
         if piece.status == 0:
-            print("ERROR: This piece is dark! Please flip it first! ")
+            print("\tINVALID! This piece is dark. Please flip it first. ")
             return False
         if piece.belongings != player:
-            print("ERROR: Can not move your component' chess. Please move your chess! ")
+            print("\tINVALID! Can not move your component' chess. Please move your chess. ")
             return False
 
         return True
@@ -171,7 +180,7 @@ class AnimalChess:
         valid_select = False
         row, col = -1, -1
         while not valid_select:
-            selected_piece_string = input("Please input the row & col number of the chess to move (Enter to go back to the last step): ")
+            selected_piece_string = input("Please input the row & col number of the piece to move (Enter to go back): ")
 
             if not selected_piece_string:
                 print("Back to choose Flip or Move.")
@@ -180,14 +189,14 @@ class AnimalChess:
             selected_piece = selected_piece_string.split()
             if len(selected_piece) != 2:
                 valid_select = False
-                print('ERROR! Please input two valid integers.')
+                print('\tINVALID! Please input two valid integers.')
                 continue
 
             try:
                 row = int(selected_piece[0])
                 col = int(selected_piece[1])
             except ValueError:
-                print("ValueError! Please input two valid integers.")
+                print("\tINVALID! Please input two valid integers.")
                 valid_select = False
             else:
                 valid_select = self.is_valid_move_from(row, col, player)
@@ -195,69 +204,82 @@ class AnimalChess:
 
     def is_valid_move_to(self, row, col, player, hint=True):
         if row > 3 or col > 3 or row < 0 or col < 0:
-            hint and print("Invalid Move! The row or col is out of index range")
+            # hint and print("\tINVALID! The row or col is out of index range.")
             return False
 
         if self.board[row][col] is None:
             # Empty position
             return True
         elif self.board[row][col].belongings == player:
-            hint and print("ERROR: Can not move to where your chess is. Please select another position!")
+            # hint and print("ERROR: Can not move to where your chess is. Please select another position!")
             return False
         elif self.board[row][col].status == 0:
-            hint and print("ERROR: Can NOT move to this position. Please flip this position first!")
+            # hint and print("ERROR: Can NOT move to this position. Please flip this position first!")
             return False
         return True
 
-    def input_move_to(self, player):
-        """
-        Input the row and col number of the move-to piece when choosing Move
-        :return: the piece at move-to position
-        """
-        valid_move = False
-        row, col = -1, -1
-        while not valid_move:
-            move_to_string = input("Please input the row & col number you want to move to: ")
-
-            # if not move_to_string:
-                # print("Back to input the move-from position.")
-                # return -1, -1, None
-
-            move_to = move_to_string.split()
-            if not move_to_string or len(move_to) != 2:
-                valid_move = False
-                print('ERROR! Please input two valid integers.')
-                continue
-            try:
-                row = int(move_to[0])
-                col = int(move_to[1])
-            except ValueError:
-                print("ValueError! Please input two valid integers.")
-                valid_move = False
-            else:
-                valid_move = self.is_valid_move_to(row, col, player)
-        return row, col, self.board[row][col]
-
-    def input_move_direction(self, row, col, player):
+    def input_move_to(self, row, col, player):
         """
         Let player input the available move direction (go up, go down, go left, go right)
         :param row: the row index of the initial (move-from) position
         :param col: the col index of the initial (move-from) position
         :param player: current player
-        :return:
+        :return: the row index, col index and the animal at move-to position
+        """
+        valid_directions = self.get_valid_move_direction(row, col, player)
+
+        if not valid_directions:
+            # no valid move for this piece
+            # TODO
+            print("\tNOTICE! There are no valid move possibilities for this piece. Please re-input a position!")
+            return -1, -1, None
+
+        is_valid_choice = False
+        while not is_valid_choice:
+            move_choice = input(f"Please input your move direction from {valid_directions}: ")
+            if move_choice in valid_directions:
+                is_valid_choice = True
+            else:
+                print("\tINVALID!")
+
+        move_to_row, move_to_col = row + directions[move_choice][0], col + directions[move_choice][1]
+        # print(move_to_row, move_to_col)
+        return move_to_row, move_to_col, self.board[move_to_row][move_to_col]
+
+    # def human_input_move_info(self, player):
+    #     valid_input = False
+    #     while not valid_input:
+    #         row, col, this_piece = self.input_move_from(player)
+    #         if row == -1 and col == -1 and this_piece is None:
+    #             # go back to choose Flip or Move
+    #             return False
+    #         # moveto_row, moveto_col, moveto_piece = self.input_move_to(player)
+    #         moveto_row, moveto_col, moveto_piece = self.input_move_direction(row, col, player)
+    #         if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
+    #             pass
+    #         else:
+    #             valid_input = True
+
+
+    def get_valid_move_direction(self, row, col, player):
+        """
+        :param row: the row index of the initial (move-from) position
+        :param col: the col index of the initial (move-from) position
+        :param player: current player
+        :return: a list of all valid move directions
         """
         # U, D, L, R
         valid_directions = []
-        if self.is_valid_move_to(row, col - 1, player, False):
-            valid_directions.append('up')
-        if self.is_valid_move_to(row, col + 1, player, False):
-            valid_directions.append('down')
-        if self.is_valid_move_to(row + 1, col, player, False):
-            valid_directions.append('right')
         if self.is_valid_move_to(row - 1, col, player, False):
+            valid_directions.append('up')
+        if self.is_valid_move_to(row + 1, col, player, False):
+            valid_directions.append('down')
+        if self.is_valid_move_to(row, col + 1, player, False):
+            valid_directions.append('right')
+        if self.is_valid_move_to(row, col - 1, player, False):
             valid_directions.append('left')
 
-        move_choice = input("Please ")
+        return valid_directions
 
     def move(self, player):
         """
@@ -267,15 +289,27 @@ class AnimalChess:
         decide the winner
         """
         # Input move from and move to position
-        print(f'{player} chooses to move.')
-        if player == "A":
-            row, col, this_piece = self.input_move_from(player)
-            if row == -1 and col == -1 and this_piece is None:
-                # go back to choose Flip or Move
-                return False
-            moveto_row, moveto_col, moveto_piece = self.input_move_to(player)
+        print(f'    {player} chooses to move')
+
+        if mode == 2 or player == 'A':
+            # User input
+            valid_input = False
+            while not valid_input:
+                row, col, this_piece = self.input_move_from(player)
+                if row == -1 and col == -1 and this_piece is None:
+                    # go back to choose Flip or Move
+                    return False
+                moveto_row, moveto_col, moveto_piece = self.input_move_to(row, col, player)
+                if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
+                    pass
+                else:
+                    valid_input = True
         else:
-            row, col, moveto_row, moveto_col, this_piece, moveto_piece = self.computer_generate_move(player)
+            # computer_generate
+            move_from_info, move_to_info = self.computer_generate_move_info(player)
+            [row, col, this_piece] = move_from_info
+            [moveto_row, moveto_col, moveto_piece] = move_to_info
+
         # print(row, col, this_piece.animal)
         # print(moveto_row, moveto_col, moveto_piece.animal)
         # if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
@@ -288,35 +322,13 @@ class AnimalChess:
         # empty_piece = Piece(None, None, None)
 
         if moveto_piece is None:  # direct move!
-            print("***** Directly Move *****")
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
-            self.print_board()
-            return True
-
-        # This piece eats opponent
-        # rules: if the dif of the present animal and the move-to animals == 1 / -7, eat the moveto position's animals
-        if this_piece.animal - moveto_piece.animal >= 1 or this_piece.animal - moveto_piece.animal == -7:
-            print("***** Eat the Opponent's Chess *****")
-            self.board[row][col] = None
-            self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
-            # dark + & ming_opponent -; ming_player no change
-            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
-
-            self.print_board()
-            return True
-
-        # this_piece is eaten by the opponent
-        if moveto_piece.animal - this_piece.animal >= 1 or moveto_piece.animal - this_piece.animal == -7:
-            print("***** Your Piece are Eaten by Your Opponent *****")
-            # dark + & ming_player -; ming_opponent no change
-            self.board[row][col] = None
 
             self.mingPieces[player].remove([row, col, this_piece.animal])
-            print("this is mingPiecesA list: ", self.mingPieces['A'])
-            print("this is mingPiecesB list: ", self.mingPieces['B'])
-
+            self.mingPieces[player].append([moveto_row, moveto_col, this_piece.animal])
             self.print_board()
+            print(f"     {player} makes a direct Move")
             return True
 
         # same animal, remove together
@@ -326,10 +338,28 @@ class AnimalChess:
 
             self.mingPieces[player].remove([row, col, this_piece.animal])
             self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
-            print("this is mingPiecesA list: ", self.mingPieces['A'])
-            print("this is mingPiecesB list: ", self.mingPieces['B'])
-
             self.print_board()
+            print("\tTwo pieces perish together.")
+            return True
+
+        # This piece eats opponent, mouse can eat elephant, elephant can not eat mouse
+        animal_dif = this_piece.animal - moveto_piece.animal
+        if 1 <= animal_dif < 7 or animal_dif == -7:
+            self.board[row][col] = None
+            self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
+
+            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
+            self.print_board()
+            print(f"     {player} eat the opponent's chess.")
+            return True
+
+        # this_piece is eaten by the opponent
+        if -7 < animal_dif < 1 or animal_dif == 7:
+            self.board[row][col] = None
+
+            self.mingPieces[player].remove([row, col, this_piece.animal])
+            self.print_board()
+            print(f"     {player}'s piece was eaten by the opponent.")
             return True
 
         self.print_board()
@@ -345,23 +375,18 @@ class AnimalChess:
             print(f"#### the {turns} turns #####")
             self.player_input("A")
             # self.player_input("B")
-            self.computer_turns()
+            self.computer_turn()
             ####
             # if turns >=4:
             #     # 如果还没有计算机翻开的棋子，计算机就不能move，只能flip
             #     # computer only flip
             #     self.computer_generate_flip("B")
             # else:
-            #     self.computer_turns()
+            #     self.computer_turn()
             ####
             # if self.decide_the_winner():
             #     pass
             turns -= 1
-
-    def eat_the_piece(self, player):
-        """
-        """
-        pass
 
     def decide_the_winner(self):
         """
@@ -429,45 +454,27 @@ class AnimalChess:
                 piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
                 self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
                 self.board[i][j] = piece
-        print(self.mingPieces)
 
-    def computer_generate_move(self, player):
-
+    def computer_generate_move_info(self, player):
         # select from MingB
         move_piece = random.choice(self.mingPieces[player])
-        row = move_piece[0]
-        col = move_piece[1]
+        [row, col, animal] = move_piece
 
-        valid_move = False
-        while not valid_move:
-            # control the 上下左右
-            row_add = random.choice([1, -1])
-            col_add = random.choice([1, -1])
-            moveto_row = row + row_add
-            moveto_col = col + col_add
+        valid_directions = self.get_valid_move_direction(row, col, player)
+        move_choice = random.choice(valid_directions)
 
-            # if invalid situation exit, loop again.
-            if moveto_row > 3 or moveto_col > 3 or moveto_row < 0 or moveto_col < 0:
-                print("Invalid Move! The row or col is out of index range")
-                valid_move = False
-                continue
-            if self.board[moveto_row][moveto_col] == player:
-                print("Invalid Move! Can not eat yourself!")
-                valid_move = False
-                continue
-            valid_move = True
+        move_to_row, move_to_col = row + directions[move_choice][0], col + directions[move_choice][1]
 
-        print(" *** Computer successful move *** ")
-        return row, col, moveto_row, moveto_col, self.board[row][col], self.board[moveto_row][moveto_col]
+        print(f"    Computer(B) moves from ({row}, {col}) to ({move_to_row}, {move_to_col})")
+        return [row, col, self.board[row][col]], [move_to_row, move_to_col, self.board[move_to_row][move_to_col]]
 
-    def add_MingPiece(self, row, col):
+    def add_to_ming_pieces(self, row, col):
         self.board[row][col].status = 1
         belonging = self.board[row][col].belongings
         self.mingPieces[belonging].append([row, col, self.board[row][col].animal])
 
     def computer_generate_flip(self, player):
-        print("*** computer choose to flip ***")
-        print(f'{player} chooses to flip.')
+        print("\tComputer chooses to flip")
         flip_valid = False
         while not flip_valid:
             row = random.randrange(4)
@@ -475,30 +482,24 @@ class AnimalChess:
             flip_valid = self.is_valid_flip(row, col)
 
         # Change the status
-        self.add_MingPiece(row, col)
+        self.add_to_ming_pieces(row, col)
 
         self.print_board()
-        print("this is mingPiecesA list: ", self.mingPieces['A'])
-        print("this is mingPiecesB list: ", self.mingPieces['B'])
-
-        print(" *** computer successful flip ***")
 
         return True
 
-    def computer_turns(self):
-
+    def computer_turn(self):
         player = "B"
-        choice_list = ['F', 'M']
-        com_move = random.choice(choice_list)
+        print("\n***** Computer's Turn *****")
+        option = random.choice(['F', 'M'])
 
         # # F
-        # if com_move == 'F':
+        # if option == 'F':
         #     self.computer_generate_flip(player)
         # # M
         # else:
-        #     self.computer_generate_move(player)
+        self.move(player)
 
-        self.computer_generate_move(player)
 
 # class Player:
 #     def __init__(self, name, board):
@@ -507,6 +508,7 @@ class AnimalChess:
 
 
 if __name__ == "__main__":
+    mode = 1  # 1: for 1 player and computer, 2 for 2 players
     animalChess = AnimalChess()
     # animalChess.generate_puzzle()
     animalChess.demo_chess()
