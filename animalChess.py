@@ -5,6 +5,8 @@ import copy
 Suzanne Wang, Keyu Han
 """
 
+PLAYER_A = 'A'
+PLAYER_B = 'B'
 
 class Piece:
     def __init__(self, animal, belongings, status=0):
@@ -192,15 +194,19 @@ class AnimalChess:
                 valid_select = self.is_valid_move_from(row, col, player)
         return row, col, self.board[row][col]
 
-    def is_valid_move_to(self, row, col, player):
+    def is_valid_move_to(self, row, col, player, hint=True):
+        if row > 3 or col > 3 or row < 0 or col < 0:
+            hint and print("Invalid Move! The row or col is out of index range")
+            return False
+
         if self.board[row][col] is None:
             # Empty position
             return True
         elif self.board[row][col].belongings == player:
-            print("ERROR: CAN NOT move to where your chess is. Please select another position!")
+            hint and print("ERROR: Can not move to where your chess is. Please select another position!")
             return False
         elif self.board[row][col].status == 0:
-            print("ERROR: CAN NOT move to this position. Please flip this position first!")
+            hint and print("ERROR: Can NOT move to this position. Please flip this position first!")
             return False
         return True
 
@@ -232,6 +238,27 @@ class AnimalChess:
             else:
                 valid_move = self.is_valid_move_to(row, col, player)
         return row, col, self.board[row][col]
+
+    def input_move_direction(self, row, col, player):
+        """
+        Let player input the available move direction (go up, go down, go left, go right)
+        :param row: the row index of the initial (move-from) position
+        :param col: the col index of the initial (move-from) position
+        :param player: current player
+        :return:
+        """
+        # U, D, L, R
+        valid_directions = []
+        if self.is_valid_move_to(row, col - 1, player, False):
+            valid_directions.append('up')
+        if self.is_valid_move_to(row, col + 1, player, False):
+            valid_directions.append('down')
+        if self.is_valid_move_to(row + 1, col, player, False):
+            valid_directions.append('right')
+        if self.is_valid_move_to(row - 1, col, player, False):
+            valid_directions.append('left')
+
+        move_choice = input("Please ")
 
     def move(self, player):
         """
@@ -332,17 +359,26 @@ class AnimalChess:
         winner: the greatest piece of A is greater than the greatest piece of B, then A wins
         """
         # if not self.darkPieces:
-        greatest_A = self.mingPiecesA.max()
-        greatest_B = self.mingPiecesB.max()
+        greatest_A = self.mingPieces[PLAYER_A].max()
+        greatest_B = self.mingPieces[PLAYER_B].max()
 
-        could_eaten_result = self.be_eaten(greatest_A, 'A', greatest_B, 'B')
+        # if B has mouse and A has elephant, greatest_A > greatest_B, not end
+        if greatest_A > greatest_B:
+            if greatest_A == 7 and 0 in self.mingPieces[PLAYER_B]:
+                return None
+            else:
+                return PLAYER_A
+        elif greatest_A == 0 and greatest_B == 7:
+            # mouse and elephant
+            return PLAYER_A
 
-        if could_eaten_result.len == 0 or 2:
-            return None
-        elif could_eaten_result.len == 1:
-            left_piece = could_eaten_result[0]
-            winner = left_piece.belongings
-            return winner
+        if greatest_B > greatest_A:
+            if greatest_B == 7 and 0 in self.mingPieces[PLAYER_A]:
+                return None
+            else:
+                return PLAYER_B
+        elif greatest_B == 0 and greatest_A == 7:
+            return PLAYER_B
 
     def be_eaten(self, animal1, belonging1, animal2, belonging2):
         """
@@ -361,7 +397,6 @@ class AnimalChess:
         Store the moves in a stack, if the stack is full? Too much same moves
         :return:
         """
-
 
     def demo_chess(self):
         demo = [
