@@ -1,3 +1,4 @@
+import random
 from random import shuffle
 import copy
 
@@ -122,9 +123,7 @@ class AnimalChess:
                 flip_valid = self.is_valid_flip(row, col)
 
         # Change the status
-        self.board[row][col].status = 1
-        belonging = self.board[row][col].belongings
-        self.mingPieces[belonging].append(self.board[row][col].animal)
+        self.add_MingPiece(row, col)
 
         self.print_board()
         print("this is mingPiecesA list: ", self.mingPieces['A'])
@@ -242,13 +241,14 @@ class AnimalChess:
         """
         # Input move from and move to position
         print(f'{player} chooses to move.')
-        row, col, this_piece = self.input_move_from(player)
-        if row == -1 and col == -1 and this_piece is None:
-            # go back to choose Flip or Move
-            return False
-
-        moveto_row, moveto_col, moveto_piece = self.input_move_to(player)
-
+        if player == "A":
+            row, col, this_piece = self.input_move_from(player)
+            if row == -1 and col == -1 and this_piece is None:
+                # go back to choose Flip or Move
+                return False
+            moveto_row, moveto_col, moveto_piece = self.input_move_to(player)
+        else:
+            row, col, moveto_row, moveto_col, this_piece, moveto_piece = self.computer_generate_move(player)
         # print(row, col, this_piece.animal)
         # print(moveto_row, moveto_col, moveto_piece.animal)
         # if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
@@ -274,7 +274,7 @@ class AnimalChess:
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
             # dark + & ming_opponent -; ming_player no change
-            self.mingPieces[moveto_piece.belongings].remove(moveto_piece.animal)
+            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
 
             self.print_board()
             return True
@@ -285,7 +285,7 @@ class AnimalChess:
             # dark + & ming_player -; ming_opponent no change
             self.board[row][col] = None
 
-            self.mingPieces[player].remove(this_piece.animal)
+            self.mingPieces[player].remove([row, col, this_piece.animal])
             print("this is mingPiecesA list: ", self.mingPieces['A'])
             print("this is mingPiecesB list: ", self.mingPieces['B'])
 
@@ -297,8 +297,8 @@ class AnimalChess:
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = None
 
-            self.mingPieces[player].remove(this_piece.animal)
-            self.mingPieces[moveto_piece.belongings].remove(moveto_piece.animal)
+            self.mingPieces[player].remove([row, col, this_piece.animal])
+            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
             print("this is mingPiecesA list: ", self.mingPieces['A'])
             print("this is mingPiecesB list: ", self.mingPieces['B'])
 
@@ -312,11 +312,21 @@ class AnimalChess:
         """
         change the player to play the game
         """
-        # first 5 turns
-        turns = 5
+        # first 6 turns
+        turns = 6
         while turns > 0:
+            print(f"#### the {turns} turns #####")
             self.player_input("A")
-            self.player_input("B")
+            # self.player_input("B")
+            self.computer_turns()
+            ####
+            # if turns >=4:
+            #     # 如果还没有计算机翻开的棋子，计算机就不能move，只能flip
+            #     # computer only flip
+            #     self.computer_generate_flip("B")
+            # else:
+            #     self.computer_turns()
+            ####
             # if self.decide_the_winner():
             #     pass
             turns -= 1
@@ -362,7 +372,6 @@ class AnimalChess:
         :return:
         """
 
-
     def demo_chess(self):
         demo = [
             [5, 1, 6, 5],
@@ -381,9 +390,79 @@ class AnimalChess:
         self.board = [[None for i in range(4)] for i in range(4)]
         for i in range(4):
             for j in range(4):
-                piece = Piece(demo[i][j], belong[i][j])
+                piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
+                self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
                 self.board[i][j] = piece
+        print(self.mingPieces)
 
+    def computer_generate_move(self, player):
+
+        # select from MingB
+        move_piece = random.choice(self.mingPieces[player])
+        row = move_piece[0]
+        col = move_piece[1]
+
+        valid_move = False
+        while not valid_move:
+            # control the 上下左右
+            row_add = random.choice([1, -1])
+            col_add = random.choice([1, -1])
+            moveto_row = row + row_add
+            moveto_col = col + col_add
+
+            # if invalid situation exit, loop again.
+            if moveto_row > 3 or moveto_col > 3 or moveto_row < 0 or moveto_col < 0:
+                print("Invalid Move! The row or col is out of index range")
+                valid_move = False
+                continue
+            if self.board[moveto_row][moveto_col] == player:
+                print("Invalid Move! Can not eat yourself!")
+                valid_move = False
+                continue
+            valid_move = True
+
+        print(" *** Computer successful move *** ")
+        return row, col, moveto_row, moveto_col, self.board[row][col], self.board[moveto_row][moveto_col]
+
+    def add_MingPiece(self, row, col):
+        self.board[row][col].status = 1
+        belonging = self.board[row][col].belongings
+        self.mingPieces[belonging].append([row, col, self.board[row][col].animal])
+
+    def computer_generate_flip(self, player):
+        print("*** computer choose to flip ***")
+        print(f'{player} chooses to flip.')
+        flip_valid = False
+        while not flip_valid:
+            row = random.randrange(4)
+            col = random.randrange(4)
+            flip_valid = self.is_valid_flip(row, col)
+
+        # Change the status
+        self.add_MingPiece(row, col)
+
+        self.print_board()
+        print("this is mingPiecesA list: ", self.mingPieces['A'])
+        print("this is mingPiecesB list: ", self.mingPieces['B'])
+
+        print(" *** computer successful flip ***")
+
+        return True
+
+    def computer_turns(self):
+
+        player = "B"
+        choice_list = ['F', 'M']
+        com_move = random.choice(choice_list)
+
+        # # F
+        # if com_move == 'F':
+        #     self.computer_generate_flip(player)
+        # # M
+        # else:
+        #     self.computer_generate_move(player)
+
+        self.computer_generate_move(player)
 
 # class Player:
 #     def __init__(self, name, board):
