@@ -76,8 +76,8 @@ class AnimalChess:
         empty_piece = "\U00002B1C"
 
         # For test
-        print("mingPiecesA: ", self.mingPieces['A'])
-        print("mingPiecesB: ", self.mingPieces['B'])
+        # print("mingPiecesA: ", self.mingPieces['A'])
+        # print("mingPiecesB: ", self.mingPieces['B'])
         # for i in range(4):
         #     for j in range(4):
         #         piece = self.board[i][j]
@@ -157,7 +157,7 @@ class AnimalChess:
                 print("\tINVALID! Please input two valid integers.")
                 flip_valid = False
             else:
-                flip_valid = self.is_valid_flip(row, col)
+                flip_valid = self.is_valid_flip(row, col, True)
 
         # Change the status
         self.add_to_ming_pieces(row, col)
@@ -165,14 +165,14 @@ class AnimalChess:
 
         return True
 
-    def is_valid_flip(self, row, col):
+    def is_valid_flip(self, row, col, hint=False):
         if row > 3 or col > 3 or row < 0 or col < 0:
-            print("\tINVALID! The row or col is out of index range.")
+            hint and print("\tINVALID! The row or col is out of index range.")
             return False
 
         piece = self.board[row][col]
         if piece is None or piece.status == 1:
-            print("\tINVALID! This one is already flipped.")
+            hint and print("\tINVALID! This one is already flipped.")
             return False
 
         return True
@@ -308,7 +308,7 @@ class AnimalChess:
         while not valid_input:
             row, col, this_piece = self.input_move_from(player)
             if this_piece is None:  # go back to choose Flip or Move
-                return False
+                return None, None
             moveto_row, moveto_col, moveto_piece = self.input_move_to(row, col, player)
             if moveto_row == -1:  # this piece has no valid move_to options
                 valid_input = False
@@ -338,19 +338,12 @@ class AnimalChess:
             move_from_info, move_to_info = self.computer_generate_move_info(player)
         
         if move_from_info is None or move_to_info is None:
-            # back to flip?
             return False
 
         [row, col, this_piece] = move_from_info
         [moveto_row, moveto_col, moveto_piece] = move_to_info
 
         print(f'    {player} chooses to move')
-        # print(row, col, this_piece.animal)
-        # print(moveto_row, moveto_col, moveto_piece.animal)
-        # if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
-        #     input_finish = False
-        # else:
-        #     input_finish = True
 
         this_piece_copied = copy.deepcopy(this_piece)
         moveto_piece_copied = copy.deepcopy(moveto_piece)
@@ -454,27 +447,6 @@ class AnimalChess:
             round += 1
 
         print("***** GAME END *****")
-        ####
-        # if turns >= 4:
-        #     # 如果还没有计算机翻开的棋子，计算机就不能move，只能flip
-        #     # computer only flip
-        #     self.computer_generate_flip("B")
-        # else:
-        #     self.computer_turn()
-        ####
-        #
-        ####
-        # # 选择赢家
-        # winner = self.decide_the_winner()
-        # if winner:
-        #     if winner == PLAYER_A:
-        #         print("*** Player A win the game! ***")
-        #         return
-        #     else:
-        #         print("*** Player B win the game! ***")
-        #         return
-        # else:
-        #     print(" *** No winner yet! ***")
 
     def determine_end(self, player):
         """
@@ -550,7 +522,6 @@ class AnimalChess:
     def computer_generate_move_info(self, player):
         valid_move = False
         sorted_ming = self.sort_open_animals(player)
-        depth = 2
         biggest_animal_index = 0
         while biggest_animal_index < len(sorted_ming) and not valid_move:
             # move_piece = random.choice(self.mingPieces[player])
@@ -596,12 +567,12 @@ class AnimalChess:
 
     def computer_smarter_choice(self):
         """
-        If the opponent has a mouse, the computer will give priority to turning over the chess card next to the mouse
-        If the opponent has a mouse, eat the opponent's mouse first:
-             See if there is any next to the mouse that can eat mouse in 1 move
-                 If not: flip the piece next to the  mouse
+        If the opponent has a rat, the computer will give priority to turning over the chess card next to the rat
+        If the opponent has a rat, eat the opponent's rat first:
+             See if there is any next to the rat that can eat rat in 1 move
+                 If not: flip the piece next to the  rat
 
-        If our mouse appears, flip to avoid the mouse next to it
+        If our rat appears, flip to avoid the rat next to it
         :return: the computer choice
         """
         for piece in self.mingPieces[PLAYER_A]:
@@ -630,7 +601,7 @@ class AnimalChess:
                     # flip the piece near the mouse
                     new_flip_list = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col)]
                     for flip in new_flip_list:
-                        if self.is_valid_flip(flip[0], flip[1]):
+                        if self.is_valid_flip(flip[0], flip[1], False):
                             # computer choose to flip
                             return flip[0], flip[1]
         # return to normal random choice
@@ -675,8 +646,9 @@ class AnimalChess:
         while not flip_valid:
             row = random.randrange(4)
             col = random.randrange(4)
-            flip_valid = self.is_valid_flip(row, col)
+            flip_valid = self.is_valid_flip(row, col, False)
 
+        print(f"\tComputer flips the piece at ({row}, {col})")
         # Change the status
         self.add_to_ming_pieces(row, col)
 
@@ -702,7 +674,7 @@ class AnimalChess:
         self.board = [[None for i in range(4)] for i in range(4)]
 
         # Test 1
-        self.darkPieceNum = 0
+        # self.darkPieceNum = 0
         # self.board[0][0] = Piece(7, 'B', 1)
         # self.board[0][1] = Piece(0, 'A', 1)
         # self.board[1][1] = Piece(7, 'A', 1)
@@ -712,8 +684,8 @@ class AnimalChess:
 
         for i in range(4):
             for j in range(4):
-                piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
-                # piece = Piece(demo[i][j], belong[i][j])  # test the flip
+                # piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
+                piece = Piece(demo[i][j], belong[i][j])  # test the flip
                 self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
                 self.board[i][j] = piece
 
