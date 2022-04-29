@@ -451,16 +451,6 @@ class AnimalChess:
         elif greatest_B == 0 and greatest_A == 7:
             return PLAYER_B
 
-    def computer_smarter_choice(self):
-        """
-        如果对手出现老鼠，计算机优先翻开老鼠旁边的棋牌
-        如果对手出现老鼠，先吃对手的老鼠：
-            看老鼠旁边有没有：1. level大于老鼠 2. 一步以内可以吃掉老鼠的
-                如果没有：优先flip老鼠旁边的棋子
-        如果自己出现老鼠，flip先避开老鼠旁边的
-        :return: the computer choice
-        """
-
     def sort_mingList(self):
         """
         for computer movement selection
@@ -488,7 +478,7 @@ class AnimalChess:
         # select from MingB
         valid_move = False
         new_ming_list = self.sort_mingList()
-        print("computer_mingList: ", new_ming_list)
+        print("computer_mingList: ", new_ming_list)  # exp  [[3, 3, 6], [1, 3, 3], [2, 2, 2], [3, 1, 0]]
         biggest_animal_index = 0
 
         while biggest_animal_index < len(new_ming_list) and not valid_move:
@@ -504,6 +494,7 @@ class AnimalChess:
                 move_choice = random.choice(valid_directions)
                 move_to_row, move_to_col = row + directions[move_choice][0], col + directions[move_choice][1]
                 valid_move = True
+
             else:
                 biggest_animal_index += 1
 
@@ -513,6 +504,82 @@ class AnimalChess:
 
         print(f"    Computer(B) moves from ({row}, {col}, {self.board[row][col].animal}) to ({move_to_row}, {move_to_col},{self.board[move_to_row][move_to_col].animal})")
         return [row, col, self.board[row][col]], [move_to_row, move_to_col, self.board[move_to_row][move_to_col]]
+
+    def computer_smarter_choice(self):
+        """
+        如果对手出现老鼠，计算机优先翻开老鼠旁边的棋牌
+        如果对手出现老鼠，先吃对手的老鼠：
+            看老鼠旁边有没有：1. ## level大于老鼠 2. 一步以内可以吃掉老鼠的
+                如果没有：优先flip老鼠旁边的棋子
+        # 如果自己出现老鼠，flip先避开老鼠旁边的
+        :return: the computer choice
+        """
+        for piece in self.mingPieces[PLAYER_A]:
+            if piece[2] == 0:
+                # check if there is any piece can eat A0 piece
+                row = self.mingPieces[PLAYER_A][0]
+                col = self.mingPieces[PLAYER_B][1]
+                # check the validation of the 4 position
+                # compare the bigger one
+                # find 4 different position
+                valid_directions = self.get_valid_move_direction(row, col, PLAYER_A)
+                if valid_directions:
+                    valid_moveto = False
+                    while not valid_moveto:
+                        next_move = valid_directions.pop()
+                        moveto_row, moveto_col = row + directions[next_move][0], col + directions[next_move][1]
+                        # check if moveto is None
+                        if self.board[moveto_row][moveto_col]:
+                            # check if animal != 7( bigger than mouse )
+                            if self.board[moveto_row][moveto_col].animal != 7:
+                                return row, col, self.board[row][col], moveto_col, moveto_col, self.board[moveto_row][moveto_col]
+                        else:
+                            valid_moveto = True
+
+                else:
+                    # flip the piece near the mouse
+                    new_flip_list = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col)]
+                    for flip in new_flip_list:
+                        if self.is_valid_flip(flip[0], flip[1]):
+                            # computer choose to flip
+                            return flip[0], flip[1]
+        # return to normal random choice
+        return None
+
+
+    def computer_turn(self):
+        """
+        :return:
+        """
+        player = "B"
+        print("\n***** Computer's Turn *****")
+
+        if self.darkPieceNum == 0: # had no darkPiece
+            option = 'M'
+        else:  # had darlPiece, no mingB, can only flip
+            if len(self.mingPieces[PLAYER_B]) == 0:
+                option = 'F'
+            else: # had darkPiece, had mingB, can F & M
+                ### smart computer
+                # smart_computer_choice = self.computer_smarter_choice()
+                # if len(smart_computer_choice) == 4:
+                #     option = 'M'
+                #     self.computer_generate_move_info() # 模拟人来输入
+                # elif len(smart_computer_choice) == 2:
+                #     option = 'F'
+                #     self.computer_generate_flip() # 模拟人来翻牌
+                # else: # smart_computer_choice == None
+                #     option = random.choice(['F', 'M'])d
+                option = random.choice(['F', 'M'])
+
+        # F
+        if option == 'F':
+            self.computer_generate_flip(player)
+        # M
+        else:
+            valid_generate = self.move(player)
+            if not valid_generate:
+                self.computer_generate_flip(player)
 
     def add_to_ming_pieces(self, row, col):
         self.board[row][col].status = 1
@@ -533,30 +600,6 @@ class AnimalChess:
         self.print_board()
 
         return True
-
-    def computer_turn(self):
-        """
-        :return:
-        """
-        player = "B"
-        print("\n***** Computer's Turn *****")
-
-        if self.darkPieceNum == 0: # had no darkPiece
-            option = 'M'
-        else:  # had darlPiece, no mingB, can only flip
-            if len(self.mingPieces[PLAYER_B]) == 0:
-                option = 'F'
-            else: # had darkPiece, had mingB, can F & M
-                option = random.choice(['F', 'M'])
-
-        # F
-        if option == 'F':
-            self.computer_generate_flip(player)
-        # M
-        else:
-            valid_generate = self.move(player)
-            if not valid_generate:
-                self.computer_generate_flip(player)
 
     def demo_chess(self):
         demo = [
