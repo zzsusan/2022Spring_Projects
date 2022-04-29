@@ -10,11 +10,12 @@ PLAYER_A = 'A'
 PLAYER_B = 'B'
 
 directions = {
-            'up': [-1, 0],
-            'down': [1, 0],
-            'right': [0, 1],
-            'left': [0, -1]
-        }
+    'up': [-1, 0],
+    'down': [1, 0],
+    'right': [0, 1],
+    'left': [0, -1]
+}
+
 
 class Piece:
     def __init__(self, animal, belongings, status=0):
@@ -27,10 +28,13 @@ class AnimalChess:
     def __init__(self):
         self.board = None
         self.darkPieces = []
+        self.darkPiecesNum = 16
         self.mingPieces = {
-            'A': [], # {row, col, animal}
+            'A': [],  # {row, col, animal}
             'B': []
         }
+        self.mode = 1
+        self.game_end = False
 
     def generate_puzzle(self):
         """
@@ -91,10 +95,7 @@ class AnimalChess:
 
     def player_input(self, player):
         """
-        this function is used to select if the next step is to make the move or eat the piece
-        player's input
-        while not valid_choice:
-
+        Let player input the choice: to flip a piece or to move a piece
         """
         print(f"\n***** {player}'s Turn *****")
         valid_choice = False
@@ -115,7 +116,8 @@ class AnimalChess:
         print(f'    {player} chooses to flip')
         flip_valid = False
         while not flip_valid:
-            selected_piece_string = input("Please input the row & col number of the chess you want to flip (Enter to exit): ")
+            selected_piece_string = input(
+                "Please input the row & col number of the chess you want to flip (Enter to exit): ")
 
             if not selected_piece_string:
                 print("\tExit flipping.")
@@ -260,7 +262,6 @@ class AnimalChess:
     #         else:
     #             valid_input = True
 
-
     def get_valid_move_direction(self, row, col, player):
         """
         :param row: the row index of the initial (move-from) position
@@ -281,6 +282,20 @@ class AnimalChess:
 
         return valid_directions
 
+    def player_input_move(self, player):
+        valid_input = False
+        while not valid_input:
+            row, col, this_piece = self.input_move_from(player)
+            if this_piece is None:  # go back to choose Flip or Move
+                return False
+            moveto_row, moveto_col, moveto_piece = self.input_move_to(row, col, player)
+            if moveto_row == -1:  # this piece has no valid move_to options
+                valid_input = False
+            else:
+                valid_input = True
+
+        return [row, col, this_piece], [moveto_row, moveto_col, moveto_piece]
+
     def move(self, player):
         """
         validate the input of select & moveto
@@ -291,24 +306,15 @@ class AnimalChess:
         # Input move from and move to position
         print(f'    {player} chooses to move')
 
-        if mode == 2 or player == 'A':
-            # User input
-            valid_input = False
-            while not valid_input:
-                row, col, this_piece = self.input_move_from(player)
-                if row == -1 and col == -1 and this_piece is None:
-                    # go back to choose Flip or Move
-                    return False
-                moveto_row, moveto_col, moveto_piece = self.input_move_to(row, col, player)
-                if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
-                    pass
-                else:
-                    valid_input = True
+        if self.mode == 1 or player == PLAYER_A:
+            # user input
+            move_from_info, move_to_info = self.player_input_move(player)
         else:
-            # computer_generate
+            # computer generate
             move_from_info, move_to_info = self.computer_generate_move_info(player)
-            [row, col, this_piece] = move_from_info
-            [moveto_row, moveto_col, moveto_piece] = move_to_info
+
+        [row, col, this_piece] = move_from_info
+        [moveto_row, moveto_col, moveto_piece] = move_to_info
 
         # print(row, col, this_piece.animal)
         # print(moveto_row, moveto_col, moveto_piece.animal)
@@ -317,16 +323,15 @@ class AnimalChess:
         # else:
         #     input_finish = True
 
-        # this_piece_copied = copy.deepcopy(this_piece)
-        # moveto_piece_copied = copy.deepcopy(moveto_piece)
-        # empty_piece = Piece(None, None, None)
+        this_piece_copied = copy.deepcopy(this_piece)
+        moveto_piece_copied = copy.deepcopy(moveto_piece)
 
         if moveto_piece is None:  # direct move!
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
 
-            self.mingPieces[player].remove([row, col, this_piece.animal])
-            self.mingPieces[player].append([moveto_row, moveto_col, this_piece.animal])
+            self.mingPieces[player].remove([row, col, this_piece_copied.animal])
+            self.mingPieces[player].append([moveto_row, moveto_col, this_piece_copied.animal])
             self.print_board()
             print(f"     {player} makes a direct Move")
             return True
@@ -336,20 +341,19 @@ class AnimalChess:
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = None
 
-            self.mingPieces[player].remove([row, col, this_piece.animal])
-            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
+            self.mingPieces[player].remove([row, col, this_piece_copied.animal])
+            self.mingPieces[moveto_piece_copied.belongings].remove([moveto_row, moveto_col, moveto_piece_copied.animal])
             self.print_board()
             print("\tTwo pieces perish together.")
             return True
 
         # This piece eats opponent, mouse can eat elephant, elephant can not eat mouse
-        animal_dif = this_piece.animal - moveto_piece.animal
+        animal_dif = this_piece_copied.animal - moveto_piece_copied.animal
         if 1 <= animal_dif < 7 or animal_dif == -7:
             self.board[row][col] = None
             self.board[moveto_row][moveto_col] = copy.deepcopy(this_piece)
 
-            print()
-            self.mingPieces[moveto_piece.belongings].remove([moveto_row, moveto_col, moveto_piece.animal])
+            self.mingPieces[moveto_piece_copied.belongings].remove([moveto_row, moveto_col, moveto_piece_copied.animal])
             self.print_board()
             print(f"     {player} eat the opponent's chess.")
             return True
@@ -358,7 +362,7 @@ class AnimalChess:
         if -7 < animal_dif < 1 or animal_dif == 7:
             self.board[row][col] = None
 
-            self.mingPieces[player].remove([row, col, this_piece.animal])
+            self.mingPieces[player].remove([row, col, this_piece_copied.animal])
             self.print_board()
             print(f"     {player}'s piece was eaten by the opponent.")
             return True
@@ -370,77 +374,137 @@ class AnimalChess:
         """
         change the player to play the game
         """
-        # first 6 turns
-        turns = 18
-        while turns > 0:
-            print(f"#### the {turns} turns #####")
-            self.player_input("A")
-            # self.player_input("B")
-            self.computer_turn()
-            ####
-            # if turns >=4:
-            #     # 如果还没有计算机翻开的棋子，计算机就不能move，只能flip
-            #     # computer only flip
-            #     self.computer_generate_flip("B")
-            # else:
-            #     self.computer_turn()
-            ####
-            #
-            ####
-            # # 选择赢家
-            # winner = self.decide_the_winner()
-            # if winner:
-            #     if winner == PLAYER_A:
-            #         print("*** Player A win the game! ***")
-            #         return
-            #     else:
-            #         print("*** Player B win the game! ***")
-            #         return
-            # else:
-            #     print(" *** No winner yet! ***")
+        mode_valid = False
+        while not mode_valid:
+            mode_str = input(
+                "Please select the game mode (1: play with your friend, 2: play with computer) (Enter to exit): ")
+            if not mode_str:
+                print("\tGame Exit.")
+                exit(0)
+            try:
+                mode = int(mode_str)
+            except ValueError:
+                print("\tINVALID! Please input 1 or 2.")
+                mode_valid = False
+            else:
+                if mode == 1:
+                    mode_valid = True
+                    print(f"\tYou choose to play with your friend!")
+                elif mode == 2:
+                    mode_valid = True
+                    print(f"\tYou choose to play with the computer!")
+                else:
+                    mode_valid = False
+                    print("\tINVALID! Please input 1 or 2.")
 
-            turns -= 1
+        self.mode = mode
+        self.print_board()
+        round = 1
+        game_end = False
+        while not game_end:
+            print(f"#### Round {round} #####")
 
-    def decide_the_winner(self):
+            self.player_input(PLAYER_A)
+            game_end = self.determine_end(PLAYER_A)
+            if game_end:
+                break
+
+            if self.mode == 1:
+                self.player_input(PLAYER_B)
+            else:
+                self.computer_turn(PLAYER_A)
+            game_end = self.determine_end(PLAYER_A)
+            round += 1
+
+        print("***** GAME END *****")
+        ####
+        # if turns >= 4:
+        #     # 如果还没有计算机翻开的棋子，计算机就不能move，只能flip
+        #     # computer only flip
+        #     self.computer_generate_flip("B")
+        # else:
+        #     self.computer_turn()
+        ####
+        #
+        ####
+        # # 选择赢家
+        # winner = self.decide_the_winner()
+        # if winner:
+        #     if winner == PLAYER_A:
+        #         print("*** Player A win the game! ***")
+        #         return
+        #     else:
+        #         print("*** Player B win the game! ***")
+        #         return
+        # else:
+        #     print(" *** No winner yet! ***")
+
+    def determine_end(self, player):
+        """
+        To determine if the game ends
+        """
+        if self.darkPiecesNum > 0:
+            # can not determine the winner when there are dark pieces
+            return False
+        winner = self.decide_the_winner(player)
+        if winner is not None:
+            print(f"\t{winner.upper()} WINS!!!!")
+            self.game_end = True
+            return True
+        return False
+
+    def decide_the_winner(self, player):
         """
         run after each eat step when all pieces are Open
         winner: the greatest piece of A is greater than the greatest piece of B, then A wins
+        :return: the winner player or None
         """
         # if not self.darkPieces:
 
         # find the greatest animal of A & B
-        lengthB = len(self.mingPieces[PLAYER_B])
-        lengthA = len(self.mingPieces[PLAYER_A])
-        id_indexA = []
-        id_indexB = []
-        for i in range(lengthA):
-            id_indexA.append(self.mingPieces[PLAYER_A][i][2])
-        greatest_A = id_indexA.max()
+        # lengthB = len(self.mingPieces[PLAYER_B])
+        # lengthA = len(self.mingPieces[PLAYER_A])
+        # id_indexA = []
+        # id_indexB = []
+        #
+        # for i in range(lengthA):
+        #     id_indexA.append(self.mingPieces[PLAYER_A][i][2])
+        # greatest_A = id_indexA.max()
+        #
+        # for i in range(lengthB):
+        #     id_indexB.append(self.mingPieces[PLAYER_B][i][2])
+        # greatest_B = id_indexB.max()
 
-        for i in range(lengthB):
-            id_indexB.append(self.mingPieces[PLAYER_B][i][2])
-        greatest_B = id_indexB.max()
+        if not self.mingPieces[PLAYER_A] and not self.mingPieces[PLAYER_B]:
+            return player
 
-        # greatest_A = self.mingPieces[PLAYER_A].max()
-        # greatest_B = self.mingPieces[PLAYER_B].max()
+        if not self.mingPieces[PLAYER_A]:
+            return PLAYER_B
 
-        # if B has mouse and A has elephant, greatest_A > greatest_B, not end
+        if not self.mingPieces[PLAYER_B]:
+            return PLAYER_A
+
+        greatest_A = self.sort_ming_pieces(PLAYER_A)[0]
+        greatest_B = self.sort_ming_pieces(PLAYER_B)[1]
+
+        # No End when greatest_A > greatest_B but B has mouse and A has elephant
+
         if greatest_A > greatest_B:
-            if greatest_A == 7 and 0 in self.mingPieces[PLAYER_B]:
+            if greatest_A == 7 and greatest_B == 0:
+                return PLAYER_B
+            elif greatest_A == 7 and 0 in self.mingPieces[PLAYER_B]:
                 return None
             else:
                 return PLAYER_A
-        elif greatest_A == 0 and greatest_B == 7:
-            # mouse and elephant
-            return PLAYER_A
-
-        if greatest_B > greatest_A:
-            if greatest_B == 7 and 0 in self.mingPieces[PLAYER_A]:
+        elif greatest_B > greatest_A:
+            if greatest_B == 7 and greatest_A == 0:
+                return PLAYER_A
+            elif greatest_A == 7 and 0 in self.mingPieces[PLAYER_B]:
                 return None
             else:
-                return PLAYER_B
-        elif greatest_B == 0 and greatest_A == 7:
-            return PLAYER_B
+                return PLAYER_A
+        elif greatest_B == greatest_A:
+            return None
 
     # def computer_strategy_choice(self):
     #     """
@@ -451,41 +515,42 @@ class AnimalChess:
     #     # select from self.mingPieces
     #     return choice
 
-    def sort_mingList(self):
+    def sort_ming_pieces(self, player):
         """
         for computer movement selection
         :return:
         """
         # self.mingPieces[PLAYER_B].sort(key= lambda self.mingPieces[PLAYER_B]: self.mingPieces[PLAYER_B][2])
-        sort_value = self.mingPieces[PLAYER_B] # exp [[0, 0, 5], [2, 3, 3], [3, 0, 1], [3, 2, 2]]
-        length = len(sort_value)
-        animal_id = []
-        new_list = []
+        mingList = self.mingPieces[player]  # exp [[0, 0, 5], [2, 3, 3], [3, 0, 1], [3, 2, 2]]
+        mingList.sort(key=lambda x: x[2], reverse=True)
+        # length = len(sort_value)
+        # animal_id = []
+        # new_list = []
+        #
+        # # get animal_id
+        # for i in range(length):
+        #     animal_id.append(sort_value[i][2])
+        # animal_id.sort(reverse=True)
+        #
+        # for id in animal_id:
+        #     for value in sort_value:
+        #         if value[2] == id:
+        #             new_list.append(value)
 
-        # get animal_id
-        for i in range(length):
-            animal_id.append(sort_value[i][2])
-        animal_id.sort(reverse=True)
-
-        for id in animal_id:
-            for value in sort_value:
-                if value[2] == id:
-                    new_list.append(value)
-
-        return new_list
+        return mingList
 
     def computer_generate_move_info(self, player):
         # select from MingB
         valid_move = False
-        new_ming_list = self.sort_mingList()
-        print("mingList", new_ming_list)
-        while not valid_move:
-            biggest_animal_index = 0
+        sorted_ming = self.sort_ming_pieces(player)
+        print("mingList", sorted_ming)
+        biggest_animal_index = 0
+        while biggest_animal_index < len(sorted_ming) and not valid_move:
             # TODO2: here random.choice() should select by srategy
             # move_piece = self.computer_strategy_choice()
             # move_piece = random.choice(self.mingPieces[player])
-            ## will biggest_animal_index be out of index???
-            move_piece = new_ming_list[biggest_animal_index]
+            # will biggest_animal_index be out of index???
+            move_piece = sorted_ming[biggest_animal_index]
             [row, col, animal] = move_piece
 
             valid_directions = self.get_valid_move_direction(row, col, player)
@@ -496,7 +561,8 @@ class AnimalChess:
             else:
                 biggest_animal_index += 1
 
-        print(f"    Computer(B) moves from ({row}, {col}, {self.board[row][col].animal}) to ({move_to_row}, {move_to_col},{self.board[move_to_row][move_to_col].animal})")
+        print(
+            f"    Computer(B) moves from ({row}, {col}, {self.board[row][col]}) to ({move_to_row}, {move_to_col},{self.board[move_to_row][move_to_col]})")
         return [row, col, self.board[row][col]], [move_to_row, move_to_col, self.board[move_to_row][move_to_col]]
 
     def add_to_ming_pieces(self, row, col):
@@ -519,8 +585,7 @@ class AnimalChess:
 
         return True
 
-    def computer_turn(self):
-        player = "B"
+    def computer_turn(self, player):
         print("\n***** Computer's Turn *****")
         option = random.choice(['F', 'M'])
 
@@ -547,16 +612,20 @@ class AnimalChess:
         ]
 
         self.board = [[None for i in range(4)] for i in range(4)]
-        for i in range(4):
-            for j in range(4):
-                piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
-                self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
-                self.board[i][j] = piece
+        self.board[0][0] = Piece(7, 'B', 1)
+        self.board[0][1] = Piece(0, 'A', 1)
+        self.mingPieces['A'].append([0, 1, 0])
+        self.mingPieces['B'].append([0, 0, 7])
+        # for i in range(4):
+        #     for j in range(4):
+        #         piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
+        #         self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
+        #         self.board[i][j] = piece
 
-# class Player:
-#     def __init__(self, name, board):
-#         self.name = name
-#         self.board = board
+    # class Player:
+    #     def __init__(self, name, board):
+    #         self.name = name
+    #         self.board = board
 
     def be_eaten(self, animal1, belonging1, animal2, belonging2):
         """
@@ -576,12 +645,10 @@ class AnimalChess:
     #     :return:
     #     """
 
+
 if __name__ == "__main__":
-    mode = 1  # 1: for 1 player and computer, 2 for 2 players
     animalChess = AnimalChess()
     # animalChess.generate_puzzle()
     animalChess.demo_chess()
-    animalChess.print_board()
-    # animalChess.player_input("A")
+    # animalChess.print_board()
     animalChess.play_the_game()
-
