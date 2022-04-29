@@ -27,7 +27,6 @@ class Piece:
 class AnimalChess:
     def __init__(self):
         self.board = None
-        self.darkPieces = []
         self.darkPieceNum = 16
         self.mingPieces = {
             'A': [],  # [row, col, animal]
@@ -77,8 +76,8 @@ class AnimalChess:
         empty_piece = "\U00002B1C"
 
         # For test
-        # print("mingPiecesA: ", self.mingPieces['A'])
-        # print("mingPiecesB: ", self.mingPieces['B'])
+        print("mingPiecesA: ", self.mingPieces['A'])
+        print("mingPiecesB: ", self.mingPieces['B'])
         # for i in range(4):
         #     for j in range(4):
         #         piece = self.board[i][j]
@@ -339,6 +338,7 @@ class AnimalChess:
             move_from_info, move_to_info = self.computer_generate_move_info(player)
         
         if move_from_info is None or move_to_info is None:
+            # back to flip?
             return False
 
         [row, col, this_piece] = move_from_info
@@ -557,15 +557,34 @@ class AnimalChess:
             move_piece = sorted_ming[biggest_animal_index]
             [row, col, animal] = move_piece
 
+            # look up 4 directions
+            directs = [[-1, 0], [1, 0], [0, 1], [0, -1]]
+            max_set = {'row': -1, 'col': -1, 'animal': -1}
+            for direct in directs:
+                new_row, new_col = row + direct[0], col + direct[1]
+                if new_row > 3 or new_col > 3 or new_row < 0 or new_col < 0:
+                    continue
 
-            valid_directions = self.get_valid_move_direction(row, col, player)
-            if valid_directions:
-                move_choice = random.choice(valid_directions)
-                move_to_row, move_to_col = row + directions[move_choice][0], col + directions[move_choice][1]
-                valid_move = True
+                check_piece = self.board[new_row][new_col]
+                if check_piece is None or check_piece.status == 0 or check_piece.belongings == player:
+                    continue
+                # special case: biggest_animal_index == 0 or 7
+                if animal == 0:
+                    if check_piece.animal == 7:
+                        max_set = {'row': new_row, 'col': new_col, 'animal': 7}
+                        break
+                else:
+                    if animal > check_piece.animal > max_set['animal']:
+                        max_set = {'row': new_row, 'col': new_col, 'animal': check_piece.animal}
 
-            else:
+            if max_set['row'] == -1:
                 biggest_animal_index += 1
+            else:
+                if animal == 7 and max_set['animal'] == 0:
+                    biggest_animal_index += 1
+                else:
+                    move_to_row, move_to_col = max_set['row'], max_set['col']
+                    valid_move = True
 
         if not valid_move:
             # no valid move possibilities, should go back to flip
