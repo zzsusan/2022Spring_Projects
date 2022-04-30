@@ -45,7 +45,7 @@ Firstly, our game will generate the 4*4 puzzle with the closed animal chess in e
 For example, Elephant can eat Lion, Lion can eat Tiger.
 (2) The Rat can eat the Elephant as a food circle.
 
-![image-20220429201147880]https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201147880.png)
+![image-20220429201147880](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201147880.png)
 
 2. For those same animals, they will disappear together if one player chose to eat his opponent.
 (1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
