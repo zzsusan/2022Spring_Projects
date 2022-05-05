@@ -4,6 +4,7 @@ import copy
 
 """
 Suzanne Wang, Keyu Han
+IS 597 Final
 """
 
 PLAYER_A = 'A'
