@@ -543,8 +543,7 @@ class AnimalChess:
 
         If our rat appears, flip to avoid the rat next to it
         :return: the computer choice
-
-       """
+        """
         def check_valid_move_or_flip(row, col):
             flip_list = []
             directions = [[-1, 0], [1, 0], [0, 1], [0, -1]]
@@ -558,11 +557,15 @@ class AnimalChess:
                     continue
 
                 if moveto_piece.status == 1 and moveto_piece.belongings == PLAYER_B and moveto_piece.animal != 7:
-                    return rat_move(row, col, movefrom_row, movefrom_col)
+                    return True, (movefrom_row, movefrom_col)
                 if moveto_piece.status == 0:
                     flip_list.append((movefrom_row, movefrom_col))
 
-            return False, flip_list # no valid rat-first strategy
+            if flip_list is None:
+                # no rat
+                return False, None
+            else:
+                return False, flip_list[0]
 
         def rat_move(row, col, movefrom_row, movefrom_col):
             self.mingPieces[PLAYER_B].append([row, col, self.board[movefrom_row][movefrom_col].animal])
@@ -575,14 +578,12 @@ class AnimalChess:
             self.darkPieceNum -= 1
             print("Rat First --- finish rat move")
             self.print_board()
-            return True, None  # return True after a valid move
 
         def rat_flip(flip_row, flip_col):
             self.board[flip_row][flip_col].status = 1
             self.add_to_ming_pieces(flip_row, flip_col)
             print("Rat First --- finish rat flip")
             self.print_board()
-            # finish a valid flip
 
         idx = 0
         human_ming_piece = self.mingPieces[PLAYER_A] # [[0, 0, 5], [0, 2, 6], [2, 0, 4], [2, 1, 7], [2, 3, 3], [3, 0, 1], [3, 2, 2]]
@@ -590,12 +591,16 @@ class AnimalChess:
             if human_ming_piece[idx][2] == 0:
                 row = human_ming_piece[idx][0]
                 col = human_ming_piece[idx][1]
-                check_status = check_valid_move_or_flip(row, col)
-                if not check_status[0]: # haven't moved
-                    if check_status[1] is not None: # can flip
-                        rat_flip(check_status[1][0][0], check_status[1][0][1])
+                is_move, position = check_valid_move_or_flip(row, col)
+                if is_move: # haven't moved
+                    rat_move(row, col, position[0], position[1])
+                    return True
+                else:
+                    if position:
+                        rat_flip(position[0], position[1])
                         return True
-
+                    else:
+                        return False
             idx += 1
         else:
             return False
@@ -620,7 +625,6 @@ class AnimalChess:
                     self.computer_generate_flip(player)
                 else:
                     self.move(player)
-
 
     def add_to_ming_pieces(self, row, col):
         self.board[row][col].status = 1
