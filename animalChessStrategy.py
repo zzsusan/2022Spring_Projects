@@ -76,8 +76,8 @@ class AnimalChess:
         empty_piece = "\U00002B1C"
 
         # For test
-        # print("mingPiecesA: ", self.mingPieces['A'])
-        # print("mingPiecesB: ", self.mingPieces['B'])
+        print("mingPiecesA: ", self.mingPieces['A'])
+        print("mingPiecesB: ", self.mingPieces['B'])
         # for i in range(4):
         #     for j in range(4):
         #         piece = self.board[i][j]
@@ -269,20 +269,6 @@ class AnimalChess:
         # print(move_to_row, move_to_col)
         return move_to_row, move_to_col, self.board[move_to_row][move_to_col]
 
-    # def human_input_move_info(self, player):
-    #     valid_input = False
-    #     while not valid_input:
-    #         row, col, this_piece = self.input_move_from(player)
-    #         if row == -1 and col == -1 and this_piece is None:
-    #             # go back to choose Flip or Move
-    #             return False
-    #         # moveto_row, moveto_col, moveto_piece = self.input_move_to(player)
-    #         moveto_row, moveto_col, moveto_piece = self.input_move_direction(row, col, player)
-    #         if moveto_row == -1 and moveto_col == -1 and moveto_piece is None:
-    #             pass
-    #         else:
-    #             valid_input = True
-
     def get_valid_move_direction(self, row, col, player):
         """
         :param row: the row index of the initial (move-from) position
@@ -336,7 +322,7 @@ class AnimalChess:
         else:
             # computer generate
             move_from_info, move_to_info = self.computer_generate_move_info(player)
-        
+
         if move_from_info is None or move_to_info is None:
             return False
 
@@ -388,6 +374,10 @@ class AnimalChess:
 
         # this_piece is eaten by the opponent
         if -7 < animal_dif < 1 or animal_dif == 7:
+            self.mingPieces[player].remove([row, col, this_piece_copied.animal])
+            self.mingPieces[opponent].remove([moveto_row, moveto_col, moveto_piece_copied.animal])
+            self.mingPieces[opponent].append([row, col, moveto_piece_copied.animal])
+
             self.board[row][col] = None
             self.mingPieces[player].remove([row, col, this_piece_copied.animal])
             self.print_board()
@@ -501,15 +491,6 @@ class AnimalChess:
         elif greatest_A == greatest_B:
             return None
 
-    # def computer_strategy_choice(self):
-    #     """
-    #
-    #     :return: the computer choice
-    #     """
-    #     choice = []
-    #     # select from self.mingPieces
-    #     return choice
-
     def sort_open_animals(self, player):
         """
         for computer movement selection
@@ -560,80 +541,111 @@ class AnimalChess:
         if not valid_move:
             # no valid move possibilities, should go back to flip
             return None, None
-            
+
         print(
             f"    Computer(B) moves from ({row}, {col}) to ({move_to_row}, {move_to_col})")
         return [row, col, self.board[row][col]], [move_to_row, move_to_col, self.board[move_to_row][move_to_col]]
 
-    def computer_smarter_choice(self):
+    def rat_strategy(self):
         """
-        If the opponent has a rat, the computer will give priority to turning over the chess card next to the rat
-        If the opponent has a rat, eat the opponent's rat first:
-             See if there is any next to the rat that can eat rat in 1 move
-                 If not: flip the piece next to the  rat
+        Rat-first strategy
+        find the rat in human player in order
+            if there is a rat
+                if there is a valid move near this rat
+                    record the (row, col)
+                        send to eat the 1 move rat of human player
+                        break
+                no valid move near rat
+                    if there is a valid flip near the rat
+                        record the valid flip
+            can not make move, find the second rat
+        finish find all rat
 
-        If our rat appears, flip to avoid the rat next to it
+        if there is a rat # but with no valid move of all rat
+           pop the first record of flip
+               send to flip function
+               break
+
+        If our mouse appears, flip to avoid the mouse next to it
         :return: the computer choice
         """
-        for piece in self.mingPieces[PLAYER_A]:
-            if piece[2] == 0:
-                # check if there is any piece can eat A0 piece
-                row = self.mingPieces[PLAYER_A][0]
-                col = self.mingPieces[PLAYER_B][1]
-                # check the validation of the 4 position
-                # compare the bigger one
-                # find 4 different position
-                valid_directions = self.get_valid_move_direction(row, col, PLAYER_A)
-                if valid_directions:
-                    valid_moveto = False
-                    while not valid_moveto:
-                        next_move = valid_directions.pop()
-                        moveto_row, moveto_col = row + directions[next_move][0], col + directions[next_move][1]
-                        # check if moveto is None
-                        if self.board[moveto_row][moveto_col]:
-                            # check if animal != 7( bigger than mouse )
-                            if self.board[moveto_row][moveto_col].animal != 7:
-                                return row, col, self.board[row][col], moveto_col, moveto_col, self.board[moveto_row][moveto_col]
-                        else:
-                            valid_moveto = True
 
-                else:
-                    # flip the piece near the mouse
-                    new_flip_list = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col)]
-                    for flip in new_flip_list:
-                        if self.is_valid_flip(flip[0], flip[1], False):
-                            # computer choose to flip
-                            return flip[0], flip[1]
-        # return to normal random choice
-        return None
+        def check_valid_move_or_flip(row, col):
+            flip_list = []
+            directions = [[-1, 0], [1, 0], [0, 1], [0, -1]]
+            for direct in directions:
+                movefrom_row, movefrom_col = row + direct[0], col + direct[1]
+
+                if movefrom_row > 3 or movefrom_col > 3 or movefrom_row < 0 or movefrom_col < 0:
+                    continue
+                moveto_piece = self.board[movefrom_row][movefrom_col]
+                if moveto_piece is None:
+                    continue
+
+                if moveto_piece.status == 1 and moveto_piece.belongings == PLAYER_B and moveto_piece.animal != 7:
+                    return rat_move(row, col, movefrom_row, movefrom_col)
+                if moveto_piece.status == 0:
+                    flip_list.append((movefrom_row, movefrom_col))
+
+            return False, flip_list  # no valid rat-first strategy
+
+        def rat_move(row, col, movefrom_row, movefrom_col):
+            self.mingPieces[PLAYER_B].append([row, col, self.board[movefrom_row][movefrom_col].animal])
+            self.mingPieces[PLAYER_A].remove([row, col, self.board[row][col].animal])
+            self.mingPieces[PLAYER_B].remove(
+                [movefrom_row, movefrom_col, self.board[movefrom_row][movefrom_col].animal])
+
+            self.board[row][col] = self.board[movefrom_row][movefrom_col]
+            self.board[movefrom_row][movefrom_col] = None
+
+            self.darkPieceNum -= 1
+            print("Rat First --- finish rat move")
+            self.print_board()
+            return True, None  # return True after a valid move
+
+        def rat_flip(flip_row, flip_col):
+            self.board[flip_row][flip_col].status = 1
+            self.add_to_ming_pieces(flip_row, flip_col)
+            print("Rat First --- finish rat flip")
+            self.print_board()
+            # finish a valid flip
+
+        idx = 0
+        human_ming_piece = self.mingPieces[
+            PLAYER_A]  # [[0, 0, 5], [0, 2, 6], [2, 0, 4], [2, 1, 7], [2, 3, 3], [3, 0, 1], [3, 2, 2]]
+        while idx < len(human_ming_piece):
+            if human_ming_piece[idx][2] == 0:
+                row = human_ming_piece[idx][0]
+                col = human_ming_piece[idx][1]
+                check_status = check_valid_move_or_flip(row, col)
+                if not check_status[0]:  # haven't moved
+                    if check_status[1] is not None:  # can flip
+                        rat_flip(check_status[1][0][0], check_status[1][0][1])
+                        return True
+
+            idx += 1
+        else:
+            return False
 
     def computer_turn(self, player):
+        """
+        computer plays the game
+        :param: player (computer turns)
+        """
         print("\n***** Computer's Turn *****")
 
         if self.darkPieceNum == 0:  # had no darkPiece
-            option = 'M'
-        else:  # had darkPiece, no mingB, can only flip
-            if len(self.mingPieces[PLAYER_B]) == 0:
-                option = 'F'
-            else:  # had darkPiece, had mingB, can F & M
-                # # smart computer
-                # smart_computer_choice = self.computer_smarter_choice()
-                # if len(smart_computer_choice) == 4:
-                #     option = 'M'
-                #     self.computer_generate_move_info()
-                # elif len(smart_computer_choice) == 2:
-                #     option = 'F'
-                #     self.computer_generate_flip()
-                # else: # smart_computer_choice == None
-                #     option = random.choice(['F', 'M'])d
-                option = random.choice(['F', 'M'])
-
-        if option == 'F':
+            self.move(player)
+        elif len(self.mingPieces[PLAYER_B]) == 0:  # darkPiece != 0, mingB = 0, can only flip
             self.computer_generate_flip(player)
         else:
-            valid_generate = self.move(player)
-            if not valid_generate:
-                self.computer_generate_flip(player)
+            # had darkPiece, had mingB, can both F or M
+            # rat first
+            if not self.rat_strategy():
+                if random.choice(['F', 'M']) == 'F':
+                    self.computer_generate_flip(player)
+                else:
+                    self.move(player)
 
     def add_to_ming_pieces(self, row, col):
         self.board[row][col].status = 1
@@ -665,10 +677,17 @@ class AnimalChess:
         ]
 
         belong = [
-            ["A", "B", "A", "B"],
+            ["A", "B", "B", "A"],
             ["B", "B", "A", "B"],
             ["A", "A", "B", "A"],
             ["A", "B", "A", "B"]
+        ]
+
+        status = [
+            [0, 0, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 1, 0, 0]
         ]
 
         self.board = [[None for i in range(4)] for i in range(4)]
@@ -685,8 +704,11 @@ class AnimalChess:
         for i in range(4):
             for j in range(4):
                 # piece = Piece(demo[i][j], belong[i][j], 1)  # test the computer move, set all the status = 1
-                piece = Piece(demo[i][j], belong[i][j])  # test the flip
-                self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
+                # piece = Piece(demo[i][j], belong[i][j])  # test the flip
+                piece = Piece(demo[i][j], belong[i][j], status[i][j])  # test the rat_first
+                # self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
+                if status[i][j] == 1:
+                    self.mingPieces[belong[i][j]].append([i, j, demo[i][j]])
                 self.board[i][j] = piece
 
 
