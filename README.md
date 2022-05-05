@@ -1,31 +1,126 @@
-# 2022 Spring Projects
+# 597 Final Project - Animal Chess
+**Team Members**: Suzanne Wang, Keyu Han
+**Project type**: Type1, Devise an original variation of existing puzzle type
+**Title**: An Animal Chess Game
+References:
 
-Each project from this semester is a public fork linked from this repository.  This is just one of the many assignments students worked on for the course, but this is the *only* one they are permitted to publish openly.
+1. https://www.ymimports.com/pages/how-to-play-jungle
+2. https://github.com/weiyinfu/MammalChess  in Chinese
+3. https://www.ifanr.com/minapp/1067085 in Chinese
 
-## Final Project Expectations:
+## Game Background
+Animal Chess (Dou Shou Qi) is a two-player traditional board game from China. It is also known as Jungle Chess and is a very popular game among children. The game bears resemblance to the western game Strategy, which is probably derived from Dou Shou Qi.
+The board is composed of four columns and nine rows of squares. The pictures of the animals indicate the starting arrangement of each animal.
+Each player has eight pieces representing different animals, each with a different degree of animal ranking(also known as animal levels). 
+There are two versions of Animal Chess basically: 
 
-You have considerable flexibility about specifics and you will publish your project openly (as a fork from here) to allow making it part of your portfolio if you choose.  You may work alone or in a team of two students. 
+1. Traditional Version
 
-Regardless of topic, it must involve notable amounts of original work of your own, though it can of course use existing libraries or be inspired by or adapted from some other published work(s). 
+![image-20220429201053137](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201053137.png)
 
-PLAGIARISM IS NOT ACCEPTABLE. From the first commit through all production of documentation and code, it must be crystal clear which, if any, parts of the project were based on or duplicated from any other source(s) all of which must be cited.  This should be so specific that any evaluator can tell which lines of code are original work and which aren't.  Same for all written narrative, documentation, images, significant algorithms, etc.
+2. Simplified Version
 
-## Project Types you may choose:
+This version has a  4*4 puzzle, as shown in the screenshot below.
 
-(Making original _variations_ of puzzles and games isn't as difficult as it may seem -- we'll discuss this in class. _Though admittedly, making *good* game variations -- that are well-balanced, strategically interesting, with good replay value_ can take expertise or luck and play-testing with revisions.  Such balanced elegance is desirable but might not be achievable here, given the short time you have.)
+At the beginning of the game, all the pieces are flipped and we can’t see what animals they are. For each step, the player can choose a piece to flip or move one of his/her existing pieces to eat the opponent’s piece, until a winner appears. The game steps and moving rules will be described in the following paragraphs.
 
-1. Devise your own new _original_ type of logic puzzle or an _original variation_ of existing puzzle type. Like with previous homework, your program should be able to randomly generate many puzzles of your type and to verify that all puzzles generated comply with the standard meta-rule that only one valid solution exists. It needs to output the unsolved puzzles in a way that a human can print or view them conveniently to try solving them and to somehow output (to file?) or display the solution for each puzzle when requested, so as not to spoil the challenge. An interactive UI to "play" the puzzles interactively is *not* required.
+We are going to implement the simplified version.
 
-2. OR develop an AI game player for an _original variation_ of some existing strategy game.  If you do this, it needs to be set up so it can either play computer-vs-computer and/or against human players with a reasonable text or graphical UI. 2B. If two teams want to independently develop AI players for the same type of game variant as each other (but using different algorithms, strategies, and/or data structures) so they can compete, that is okay.  A sub-variation is to enable this game type on our course game server, discuss with the instructor if this is of interest.
+## Game Rules
+Firstly, our game will generate the 4*4 puzzle with the closed animal chess in every position ( However, every chess type and its owner player has generated randomly ). Then, the player will make moves based on the basic game rules.  The game will firstly be visualized in the command line.
 
-3. OR Computationally 'Solve' a game.  _Background: Some strategic games, especially those of perfect information are known to be "solved". See https://en.wikipedia.org/wiki/Solved_game, which we discussed in class._  Sometimes these proofs are done through mathematical analysis, other times through exhaustive computational verification. If you choose this option, you can either write your own code or modify some existing code that plays a game, to exhaustively analyze a game to attempt to prove if it is "solved" in this way for certain configurations. Changes to rules or conditions of a known solved game can alter this outcome and require reanalysis.
+### Basic Game rules
+
+1. Each player should take an action in order.
+(1) The **action** can be one of the below:
+	① **Flip** a new animal piece.
+		In this step, the player should select a piece and flip it. What’s more, the opened chess may belong to himself or his opponent because the puzzle was generated randomly in the beginning.
+	② **Move** an existing opened animal piece to an empty position or eat the opponent’s animal based on the level of the animal(eat strategy).
+2. Decide the winner:  If one player has lost all the chess, and the other has not, the player who first loses all the animal chess will lose. However, if there are 2 players on the board who may let the game get stuck into an endless loop, we will define the largest loop number to stop the game.
+
+### The level of animal(eat strategy)
+
+1. Elephant > Lion > Tiger > Leopard > Dog > Woof > Cat > Rat > Elephant 
+(1) The higher level animals can eat his next level animals.
+For example, Elephant can eat Lion, Lion can eat Tiger.
+(2) The Rat can eat the Elephant as a food circle.
+
+![image-20220429201147880](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201147880.png)
+
+2. For those same animals, they will disappear together if one player chose to eat his opponent.
+(1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
+
+![image-20220429201201567](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201201567.png)
+
+# Player Type
+
+### Human Vs. Human
+
+In this mode, two player will select the next step in Python Console in order.
+
+```
+player_input()
+flip_the_piece()
+input_move_from()
+input_move_to()
+move()
+```
+
+### Human Vs. Computer
+
+In this mode, computer will use its strategy to play with human player
+
+```
+computer_turn
+computer_generate_flip
+computer_generate_move_info
+move
+```
 
 
-## Deliverables and other Requirements:
 
-* Have some fun!
-* In your own fork, please replace this README.md file's contents with a good introduction to your own project. 
-* Targeted Algorithm Analysis:  Regardless of which option you choose, you need to _describe the performance characteristics of some critical parts of your program and explain why you chose the data structures and core algorithm(s) you did_. So for example, if you chose Type #1, what's the Big-O, Big-Theta, or Big-Omega run-time complexity of your puzzle solver? Or the puzzle generator? If you're doing Type #2 and using minimax or similar, what's the complexity of your heuristic evaluation function?  
-* Performance Measurement: Supplement the analysis above with run-time measurements of multiple iterations of the game or puzzles as discussed in class.
-* If your team has more than one student, see that everyone makes substantial git commits. In addition, your README documentation should include a summary of how you shared the work.
-* Live in-class presentation & demonstration of your work.
+### AI strategy
+
+After successfully running out the game, we will optimize an AI game strategy if the time is enough. For example, we will add these rules to improve the computer performance:
+
+1. Biggest First: Our game will choose to move the higher-level animals first.
+2. Rat First: Our game will flip the piece near the Elephant and the Rat at last.
+
+### Control the Game
+
+```
+play_the_game
+determine_end
+decide_the_winner
+```
+
+# Main Class 
+
+![image-20220429201547123](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201547123.png)
+
+![image-20220429201558018](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201558018.png)
+
+# Main Functions & Big(O) Analysis
+
+## Basic Function
+
+
+
+## Validation Functions
+
+
+
+## Strategy Functions
+
+
+
+## Flip
+
+
+
+## Move
+
+
+
+
+
