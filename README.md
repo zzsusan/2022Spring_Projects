@@ -143,21 +143,50 @@ play_the_game
 ```
 
 
-# Time Complexity Analysis
+## Time Complexity Analysis
 
-## rat_strategy():
-	O(n*m) n is the number of player's Ming Piece in the MingPiece List in the for loop; 
-	O(m) is the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)
+### rat_strategy():
+O(n*logM), n is the number of player's Ming Piece in the MingPiece List in the for loop, <br>
+O(Log M) is the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)
 
-### check_valid_move_or_flip()
-	O(4) 4 means 4 potential moves for a piece of chess on the board
-	Thus, O(1) is the time complexity of this function
-### eat_rat()
-	O(m) m is the number of player's Ming Piece in the MingPiece List
+- #### check_valid_move_or_flip()
+	O(m) m is the 4 potential moves for a piece of chess on the board
+    Thus, O(1) is the time complexity of this function
+- #### eat_rat()
+    O(log n), n is the number of player's Ming Piece in the MingPiece List
 
-### rat_flip()
-	O(1)  because this function only use append() function 
+- #### rat_flip()
+    O(1).  because this function only use append() function 
 
+
+### move(player)
+move() is the most complex and important function in our program. <br>
+
+Firstly, we get the move info from user input by calling player_input_move(player), or get it from computer generation by calling computer_generate_move_info(player). <br>
+
+Then we compute and get the result (4 types). <br>
+Based on the update of board and mingPieces, the time complexity of this part is O(N). N is the maximum number of two players' ming pieces. <br>
+Because the time complexity of list.remove() is O(N), and list.append() is O(1).
+
+- #### player_input_move(player)
+	**O(n + m)** <br>
+	n is the number of invalid player input of move_from info, <br>
+	m is the number of invalid player input of move_to info. 
+	This function calls input_move_from() and input_move_to(), and the overall time complexity depends on the player input.
+
+- #### computer_generate_move_info(player)
+	**O(N * 4)** <br>
+	N is the number of opened pieces of the human player. <br>
+	There is a constant 4 because we need to check all 4 pieces next to the current computer's piece.
+
+## Improvement
+Since we keep track of each player's opened pieces list (to determine the end and generate computer's move), 
+we need to update the mingPieces list in each operation. 
+So, the updates costs some time. <br>
+When analyzing the time complexity, we found it would be faster if we changed the structure of mingPieces.
+That is, use a map-like structure (in Python we use Dictionaries), set animal as the key, and set position as the value. <br>
+In this way we could decrease the time complexity of updating mingPieces from O(N) to O(1), 
+fastening the processing time of our program.
 
 
 # Contributions
