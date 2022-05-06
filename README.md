@@ -19,7 +19,7 @@ There are two versions of Animal Chess basically:
 1. Traditional Version
 
 <div align="center">
-	<img src = "img/image-20220429201053137.png" width = "50%">
+	<img src = "img/image-20220429201053137.png" width = "40%">
 </div>
 
 
@@ -69,7 +69,7 @@ For example, Elephant can eat Lion, Lion can eat Tiger.
 (1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
 
 <div align="center">
-	<img src = "img/image-20220429201201567.png" width = "50%">
+	<img src = "img/image-20220429201201567.png" width = "40%">
 </div>
 
 ## Play Modes
