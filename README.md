@@ -98,7 +98,7 @@ move
 ```
 
 
-## Compute Strategies
+## Computer Strategies
 
 1. Biggest First: this algorithm will detect if there's high level animal that could eat the next opponent
 
@@ -106,9 +106,9 @@ move
 
 2. Rat First: Our game will flip the piece near the Elephant and the Rat at last.
 
-	If the opponent(human player) has a rat, the computer will firstly find his chess to eat the opponen's rat in one move. Otherwise, the computer player will give priority to turning over the chess card next to the rat.
+	If the opponent(human player) has a rat, the computer will firstly find his chess to eat the opponent's rat in one move. Otherwise, the computer player will give priority to turning over the chess card next to the rat.
 	
-	The return value will be True/False. True means the computer has used the rat_strategy to move/flip; False means the computer didn't use the rat_strategy
+	The return value is a Bool. True means the computer has used the rat_strategy to move/flip; False means the computer didn't use the rat_strategy
 
 ## Main Classes and Main Function
 ### Piece Class
@@ -159,9 +159,10 @@ play_the_game
 ## Time Complexity Analysis
 
 ### rat_strategy():
-O(n*m), n is the number of player's Ming Piece in the MingPiece List in the for loop; <br>
-O(m), m is the maximum number of two players' Ming Pieces. <br>
-This time complexity comes from the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)<br>
+O(n*m), <br>
+n is the number of human player's Ming Pieces (opened pieces) used in the for loop, 
+m is the maximum number of two players' Ming Pieces. <br>
+O(m) comes from the time complexity of check_valid_move_or_flip() + MAX(eat_rat() + rat_flip()). <br>
 
 - #### check_valid_move_or_flip()
     O(4), 4 means 4 potential moves for a piece of chess on the board.<br>  
@@ -178,25 +179,25 @@ This time complexity comes from the time complexity of check_valid_move_or_flip 
 ### move(player)
 move() is the most complex and important function in our program. <br>
 
-Firstly, we get the move info from user input by calling player_input_move(player), or get it from computer generation by calling computer_generate_move_info(player). <br>
+Firstly, we get the move info from user input by calling player_input_move(player), or from computer generation by calling computer_generate_move_info(player). <br>
 
-Then we compute and get the result (4 types). <br>
+Then we compute and get 4 possible results. <br>
 Based on the update of board and mingPieces, the time complexity of this part is O(N). N is the maximum number of two players' ming pieces. <br>
 Because the time complexity of list.remove() is O(N), and list.append() is O(1).
 
 - #### player_input_move(player)
 	**O(n + m)** <br>
-	n is the number of invalid player input of move_from info, <br>
-	m is the number of invalid player input of move_to info. 
+	n is the number of invalid human player input of move_from info, <br>
+	m is the number of invalid human player input of move_to info. 
 	This function calls input_move_from() and input_move_to(), and the overall time complexity depends on the player input.
 
 - #### computer_generate_move_info(player)
 	**O(N * 4)** <br>
-	N is the number of opened pieces of the human player. <br>
+	N is the number of ming pieces of the computer player. <br>
 	There is a constant 4 because we need to check all 4 pieces next to the current computer's piece.
 
 ## Improvement
-Since we keep track of each player's opened pieces list (to determine the end and generate computer's move), 
+Since we keep track of each player's ming pieces list (to determine the end and generate computer's move), 
 we need to update the mingPieces list in each operation. 
 So, the updates costs some time. <br>
 When analyzing the time complexity, we found it would be faster if we changed the structure of mingPieces.
@@ -206,4 +207,4 @@ fastening the processing time of our program.
 
 
 # Contributions
-We write the fundamental function for human vs. human and human vs. computer algorithm. Then, Suzanne mainly wrote the Biggest-First Algorithm and Keyu mainly wrote the Rat-First Algorithm.
+We wrote the fundamental functions for human v.s. human first together, and then wrote the random generation functions of computer. After that, Suzanne wrote the Biggest-First Strategy and Keyu wrote the Rat-First Strategy.
