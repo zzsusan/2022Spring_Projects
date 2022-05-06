@@ -29,7 +29,7 @@ We are going to implement the simplified version.
 ## Game Rules
 Firstly, our game will generate the 4*4 puzzle with the closed animal chess in every position ( However, every chess type and its owner player has generated randomly ). Then, the player will make moves based on the basic game rules.  The game will firstly be visualized in the command line.
 
-### Basic Game rules
+### Basic Rules
 
 1. Each player should take an action in order.
 (1) The **action** can be one of the below:
@@ -38,25 +38,25 @@ Firstly, our game will generate the 4*4 puzzle with the closed animal chess in e
 	② **Move** an existing opened animal piece to an empty position or eat the opponent’s animal based on the level of the animal(eat strategy).
 2. Decide the winner:  If one player has lost all the chess, and the other has not, the player who first loses all the animal chess will lose. However, if there are 2 players on the board who may let the game get stuck into an endless loop, we will define the largest loop number to stop the game.
 
-### The level of animal(eat strategy)
+### Levels of animals (food chain)
 
-1. Elephant > Lion > Tiger > Leopard > Dog > Woof > Cat > Rat > Elephant 
+1. In our game, Elephant > Lion > Tiger > Leopard > Dog > Woof > Cat > Rat.
 (1) The higher level animals can eat his next level animals.
 For example, Elephant can eat Lion, Lion can eat Tiger.
-(2) The Rat can eat the Elephant as a food circle.
+(2) However, Rat can kill Elephant as a special case.
 
 ![image-20220429201147880](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201147880.png)
 
-2. For those same animals, they will disappear together if one player chose to eat his opponent.
+2. If two same animals meet, they will disappear together.
 (1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
 
 ![image-20220429201201567](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201201567.png)
 
-# Player Type
+## Play Modes
+We have two play modes for users to choose: play with a friend, or play with the computer.
+### Human V.S. Human
 
-### Human Vs. Human
-
-In this mode, two player will select the next step in Python Console in order.
+In this mode, two players will input their steps in Python Console in order.
 
 ```
 player_input()
@@ -66,9 +66,9 @@ input_move_to()
 move()
 ```
 
-### Human Vs. Computer
+### Human V.S. Computer
 
-In this mode, computer will use its strategy to play with human player
+In this mode, human player will play with the computer that uses strategies.
 
 ```
 computer_turn
@@ -78,47 +78,49 @@ move
 ```
 
 
-
-### AI strategy
-
-After successfully running out the game, we will optimize an AI game strategy if the time is enough. For example, we will add these rules to improve the computer performance:
+## Compute Strategies (TODO)
 
 1. Biggest First: Our game will choose to move the higher-level animals first.
 2. Rat First: Our game will flip the piece near the Elephant and the Rat at last.
 
-### Control the Game
+## Main Classes and Main Function
+### Piece Class
+
+![image-20220429201547123](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201547123.png)
+
+### AnimalChess Class
+
+![image-20220429201558018](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201558018.png)
+
+### Main Functions (TODO)
+
+#### Game Control Functions
 
 ```
 play_the_game
 determine_end
 decide_the_winner
 ```
-
-# Main Class 
-
-![image-20220429201547123](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201547123.png)
-
-![image-20220429201558018](https://github.com/zzsusan/2022Spring_Projects/blob/main/image-20220429201558018.png)
-
-# Main Functions & Big(O) Analysis
-
-## Basic Function
+#### Basic Function
 
 
 
-## Validation Functions
+#### Validation Functions
 
 
 
-## Strategy Functions
+#### Strategy Functions
 
 
 
-## Flip
+#### Flip
 
 
 
-## Move
+#### Move
+
+## Complexity Analysis (TODO)
+
 
 
 
