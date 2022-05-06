@@ -27,14 +27,12 @@ This version has a  4*4 puzzle, as shown in the screenshot below.
 At the beginning of the game, all the pieces are flipped and we can’t see what animals they are. For each step, the player can choose a piece to flip or move one of his/her existing pieces to eat the opponent’s piece, until a winner appears. The game steps and moving rules will be described in the following paragraphs.
 
 We are going to implement the simplified version.
-![img1](img/img1.png)
+
 <div>
-	<img src = "https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img1.png" width = "50%">
-	<img src = "https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img2.png" width = "50%">
+	<img src = "img/img1.png" width = "40%">
+	<img src = "img/img2.png" width = "42%">
 </div>
 
-
-![img2](img/img2.png)
 
 ![img3](img/img3.png)
 
