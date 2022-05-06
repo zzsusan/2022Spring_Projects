@@ -542,13 +542,9 @@ class AnimalChess:
 
     def rat_strategy(self):
         """
-        If the opponent has a rat, the computer will give priority to turning over the chess card next to the rat
-        If the opponent has a rat, eat the opponent's rat first:
-             See if there is any next to the rat that can eat rat in 1 move
-                 If not: flip the piece next to the  rat
-
-        If our rat appears, flip to avoid the rat next to it
-        :return: the computer choice
+    If the opponent(human player) has a rat, the computer will firstly find his chess to eat the opponen's rat in one move.
+    Otherwise, the computer player will give priority to turning over the chess card next to the rat.
+    :return: True: use the rat_strategy to move/flip; False: didn't use the rat_strategy
         """
         def check_valid_move_or_flip(rat_row, rat_col):
             flip_list = []

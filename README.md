@@ -18,7 +18,7 @@ There are two versions of Animal Chess basically:
 
 1. Traditional Version
 
-![image-20220429201053137](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/image-20220429201053137.png)
+![image-20220429201053137](img/image-20220429201053137.png)
 
 2. Simplified Version
 
@@ -27,9 +27,9 @@ This version has a  4*4 puzzle, as shown in the screenshot below.
 At the beginning of the game, all the pieces are flipped and we can’t see what animals they are. For each step, the player can choose a piece to flip or move one of his/her existing pieces to eat the opponent’s piece, until a winner appears. The game steps and moving rules will be described in the following paragraphs.
 
 We are going to implement the simplified version.
-![img1](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img1.png)
+![img1](himg/img1.png)
 
-![img2](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img2.png)
+![img2](img/img2.png)
 
 ## Game Rules
 Firstly, our game will generate the 4*4 puzzle with the closed animal chess in every position ( However, every chess type and its owner player has generated randomly ). Then, the player will make moves based on the basic game rules.  The game will firstly be visualized in the command line.
@@ -50,12 +50,12 @@ Firstly, our game will generate the 4*4 puzzle with the closed animal chess in e
 For example, Elephant can eat Lion, Lion can eat Tiger.
 (2) However, Rat can kill Elephant as a special case.
 
-![image-20220429201147880](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/image-20220429201147880.png)
+![image-20220429201147880](img/image-20220429201147880.png)
 
 2. If two same animals meet, they will disappear together.
 (1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
 
-![image-20220429201201567](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/image-20220429201201567.png)
+![image-20220429201201567](img/image-20220429201201567.png)
 
 ## Play Modes
 We have two play modes for users to choose: play with a friend, or play with the computer.
@@ -83,19 +83,26 @@ move
 ```
 
 
-## Compute Strategies (TODO)
+## Compute Strategies
 
-1. Biggest First: Our game will choose to move the higher-level animals first.
+1. Biggest First: this algorithm will detect if there's high level animal that could eat the next opponent
+
+    The Biggest-First algorithm will first sort the ming list of computer player. Then, it will find if there is any chess can eat the nearest human player's chess in order. After finding the existed chess, the row and column will be returned. 
+
 2. Rat First: Our game will flip the piece near the Elephant and the Rat at last.
+
+	If the opponent(human player) has a rat, the computer will firstly find his chess to eat the opponen's rat in one move. Otherwise, the computer player will give priority to turning over the chess card next to the rat.
+	
+	The return value will be True/False. True means the computer has used the rat_strategy to move/flip; False means the computer didn't use the rat_strategy
 
 ## Main Classes and Main Function
 ### Piece Class
 
-![image-20220429201547123](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/image-20220429201547123.png)
+![image-20220429201547123](img/image-20220429201547123.png)
 
 ### AnimalChess Class
 
-![image-20220429201558018](https://github.com/zzsusan/2022Spring_Projects/blob/main/img/image-20220429201558018.png)
+![image-20220429201558018](img/image-20220429201558018.png)
 
 ### Main Functions (TODO)
 
@@ -127,14 +134,14 @@ decide_the_winner
 # Time Complexity Analysis
 
 ## rat_strategy():
-	O(n*logM) n is the number of player's Ming Piece in the MingPiece List in the for loop; 
-	O(Log M) is the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)
+	O(n*m) n is the number of player's Ming Piece in the MingPiece List in the for loop; 
+	O(m) is the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)
 
 ### check_valid_move_or_flip()
-	O(m) m is the 4 potential moves for a piece of chess on the board
+	O(4) 4 means 4 potential moves for a piece of chess on the board
 	Thus, O(1) is the time complexity of this function
 ### eat_rat()
-	O(log n) n is the number of player's Ming Piece in the MingPiece List
+	O(m) m is the number of player's Ming Piece in the MingPiece List
 
 ### rat_flip()
 	O(1)  because this function only use append() function 
