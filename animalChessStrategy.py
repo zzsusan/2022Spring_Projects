@@ -698,7 +698,7 @@ class AnimalChess:
 
 if __name__ == "__main__":
     animalChess = AnimalChess()
-    # animalChess.generate_puzzle()
-    animalChess.demo_chess()
+    animalChess.generate_puzzle()
+    # animalChess.demo_chess()
     # animalChess.print_board()
     animalChess.play_the_game()
