@@ -27,9 +27,11 @@ This version has a  4*4 puzzle, as shown in the screenshot below.
 At the beginning of the game, all the pieces are flipped and we can’t see what animals they are. For each step, the player can choose a piece to flip or move one of his/her existing pieces to eat the opponent’s piece, until a winner appears. The game steps and moving rules will be described in the following paragraphs.
 
 We are going to implement the simplified version.
-![img1](himg/img1.png)
+![img1](img/img1.png)
 
 ![img2](img/img2.png)
+
+![img3](img/img3.png)
 
 ## Game Rules
 Firstly, our game will generate the 4*4 puzzle with the closed animal chess in every position ( However, every chess type and its owner player has generated randomly ). Then, the player will make moves based on the basic game rules.  The game will firstly be visualized in the command line.
@@ -113,23 +115,47 @@ play_the_game
 determine_end
 decide_the_winner
 ```
-#### Basic Function
 
+### Human vs. Human
+```
+player_input
+flip_the_piece
+input_move_from
+input_move_to
+move
+```
+
+### Human Vs. Computer
+```commandline
+computer_turn
+rat_strategy
+computer_generate_flip
+computer_generate_move_info
+move
+```
+
+#### Strategy Functions
+```
+computer_generate_move_info 
+rat_frist
+```
 
 
 #### Validation Functions
+```commandline
+is_valid_flip  
+is_valid_move_from 
+get_valid_move_direction
+```
 
 
+#### Basic Function
+```commandline
+generate_puzzle
+print_board
+play_the_game
+```
 
-#### Strategy Functions
-
-
-
-#### Flip
-
-
-
-#### Move
 
 # Time Complexity Analysis
 
@@ -146,7 +172,7 @@ decide_the_winner
 ### rat_flip()
 	O(1)  because this function only use append() function 
 
-# 
+
 
 # Contributions
 We write the fundamental function for human vs. human and human vs. computer algorithm. Then, Suzzan mainly wrote the Biggest-First Algorithm and Keyu mainly wrote the Rat-First Algorithm.
