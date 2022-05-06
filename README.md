@@ -18,7 +18,10 @@ There are two versions of Animal Chess basically:
 
 1. Traditional Version
 
-![image-20220429201053137](img/image-20220429201053137.png)
+<div align="center">
+	<img src = "img/image-20220429201053137.png" width = "50%">
+</div>
+
 
 2. Simplified Version
 
@@ -28,13 +31,16 @@ At the beginning of the game, all the pieces are flipped and we can’t see what
 
 We are going to implement the simplified version.
 
-<div>
+<div align="center">
 	<img src = "img/img1.png" width = "40%">
 	<img src = "img/img2.png" width = "42%">
 </div>
 
 
-![img3](img/img3.png)
+<div align="center">
+	<img src = "img/img3.png" width = "80%">
+</div>
+
 
 ## Game Rules
 Firstly, our game will generate the 4*4 puzzle with the closed animal chess in every position ( However, every chess type and its owner player has generated randomly ). Then, the player will make moves based on the basic game rules.  The game will firstly be visualized in the command line.
@@ -55,12 +61,16 @@ Firstly, our game will generate the 4*4 puzzle with the closed animal chess in e
 For example, Elephant can eat Lion, Lion can eat Tiger.
 (2) However, Rat can kill Elephant as a special case.
 
-![image-20220429201147880](img/image-20220429201147880.png)
+<div align="center">
+	<img src = "img/image-20220429201147880.png" width = "50%">
+</div>
 
 2. If two same animals meet, they will disappear together.
 (1) A moving example: In the following case, the red Tiger will eat the blue Tiger, and they will disappear together. And finally, the red player will win because he is the last chess owner.
 
-![image-20220429201201567](img/image-20220429201201567.png)
+<div align="center">
+	<img src = "img/image-20220429201201567.png" width = "50%">
+</div>
 
 ## Play Modes
 We have two play modes for users to choose: play with a friend, or play with the computer.
@@ -102,12 +112,16 @@ move
 
 ## Main Classes and Main Function
 ### Piece Class
-
-![image-20220429201547123](img/image-20220429201547123.png)
+<div align="center">
+	<img src = "img/image-20220429201547123.png" width = "50%">
+</div>
 
 ### AnimalChess Class
 
-![image-20220429201558018](img/image-20220429201558018.png)
+<div align="center">
+	<img src = "img/image-20220429201558018.png" width = "50%">
+</div>
+
 
 ### Main Functions
 
