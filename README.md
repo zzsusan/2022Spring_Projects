@@ -109,7 +109,7 @@ move
 
 ![image-20220429201558018](img/image-20220429201558018.png)
 
-### Main Functions (TODO)
+### Main Functions
 
 #### Game Control Functions
 
@@ -135,28 +135,30 @@ get_valid_move_direction
 ```
 
 
-#### Basic Function
+#### Basic Functions
 ```commandline
 generate_puzzle
 print_board
 play_the_game
 ```
 
-
 ## Time Complexity Analysis
 
 ### rat_strategy():
-O(n*logM), n is the number of player's Ming Piece in the MingPiece List in the for loop, <br>
-O(Log M) is the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)
+O(n*m), n is the number of player's Ming Piece in the MingPiece List in the for loop; <br>
+O(m), m is the maximum number of two players' Ming Pieces. <br>
+This time complexity comes from the time complexity of check_valid_move_or_flip + MAX(eat_rat + rat_flip)<br>
 
 - #### check_valid_move_or_flip()
-	O(m) m is the 4 potential moves for a piece of chess on the board
-    Thus, O(1) is the time complexity of this function
+    O(4), 4 means 4 potential moves for a piece of chess on the board.<br>  
+	Thus, O(1) is the time complexity of this function. 
 - #### eat_rat()
-    O(log n), n is the number of player's Ming Piece in the MingPiece List
+    O(m), m is the number of player's Ming Piece in the MingPiece List.<br>
+    Because rat_est() uses remove() to both remove pieces of human player's Ming Piece List and the computer player's Ming Piece List. <br>
+    Thus, in this time complexity, m is the maximum number of two players' ming pieces. 
 
 - #### rat_flip()
-    O(1).  because this function only use append() function 
+    O(1), because this function only use append() function. 
 
 
 ### move(player)
