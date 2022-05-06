@@ -28,6 +28,11 @@ At the beginning of the game, all the pieces are flipped and we can’t see what
 
 We are going to implement the simplified version.
 ![img1](img/img1.png)
+<div>
+	<img src = "https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img1.png" width = "50%">
+	<img src = "https://github.com/zzsusan/2022Spring_Projects/blob/main/img/img2.png" width = "50%">
+</div>
+
 
 ![img2](img/img2.png)
 
@@ -116,23 +121,6 @@ determine_end
 decide_the_winner
 ```
 
-### Human vs. Human
-```
-player_input
-flip_the_piece
-input_move_from
-input_move_to
-move
-```
-
-### Human Vs. Computer
-```commandline
-computer_turn
-rat_strategy
-computer_generate_flip
-computer_generate_move_info
-move
-```
 
 #### Strategy Functions
 ```
@@ -175,4 +163,4 @@ play_the_game
 
 
 # Contributions
-We write the fundamental function for human vs. human and human vs. computer algorithm. Then, Suzzan mainly wrote the Biggest-First Algorithm and Keyu mainly wrote the Rat-First Algorithm.
+We write the fundamental function for human vs. human and human vs. computer algorithm. Then, Suzanne mainly wrote the Biggest-First Algorithm and Keyu mainly wrote the Rat-First Algorithm.
