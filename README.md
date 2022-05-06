@@ -1,9 +1,11 @@
 # 597 Final Project - Animal Chess
-**Team Members**: Suzanne Wang, Keyu Han
-**Project type**: Type1, Devise an original variation of existing puzzle type
-**Title**: An Animal Chess Game
-References:
+**Team Members**: Suzanne Wang, Keyu Han <br>
 
+**Project type**: Type1. Devise an original variation of existing puzzle type. <br>
+
+**Title**: An Animal Chess Game <br>
+
+**References**
 1. https://www.ymimports.com/pages/how-to-play-jungle
 2. https://github.com/weiyinfu/MammalChess  in Chinese
 3. https://www.ifanr.com/minapp/1067085 in Chinese
